@@ -54,8 +54,6 @@
 #define WIFI_RX_GPIO_Port GPIOA
 #define WIFI_TX_Pin GPIO_PIN_3
 #define WIFI_TX_GPIO_Port GPIOA
-#define ACC_CS_Pin GPIO_PIN_4
-#define ACC_CS_GPIO_Port GPIOA
 #define ACC_SCK_Pin GPIO_PIN_5
 #define ACC_SCK_GPIO_Port GPIOA
 #define ACC_MISO_Pin GPIO_PIN_6
@@ -74,14 +72,16 @@
 #define HALL_SENS_PWR_GPIO_Port GPIOB
 #define RF_CE_Pin GPIO_PIN_11
 #define RF_CE_GPIO_Port GPIOB
-#define RF_CS_Pin GPIO_PIN_12
-#define RF_CS_GPIO_Port GPIOB
 #define RF_SCK_Pin GPIO_PIN_13
 #define RF_SCK_GPIO_Port GPIOB
 #define RF_MISO_Pin GPIO_PIN_14
 #define RF_MISO_GPIO_Port GPIOB
 #define RF_MOSI_Pin GPIO_PIN_15
 #define RF_MOSI_GPIO_Port GPIOB
+#define INDICATOR2_Pin GPIO_PIN_6
+#define INDICATOR2_GPIO_Port GPIOC
+#define WIFI_PWR_Pin GPIO_PIN_7
+#define WIFI_PWR_GPIO_Port GPIOC
 #define SD_DAT0_Pin GPIO_PIN_8
 #define SD_DAT0_GPIO_Port GPIOC
 #define SD_DAT1_Pin GPIO_PIN_9
@@ -114,6 +114,8 @@
 #define RF_IRQ_GPIO_Port GPIOB
 #define INDICATOR1_Pin GPIO_PIN_7
 #define INDICATOR1_GPIO_Port GPIOB
+#define SENS_OPEN_Pin GPIO_PIN_9
+#define SENS_OPEN_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

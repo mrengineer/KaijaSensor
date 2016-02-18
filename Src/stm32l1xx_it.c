@@ -57,19 +57,12 @@ extern UART_HandleTypeDef huart2;
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-	static unsigned int ms;
-	
+
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-	if (ms > 500 ) {
-		HAL_GPIO_WritePin(STATUS_GPIO_Port, STATUS_Pin, GPIO_PIN_RESET);
-	} else {
-		HAL_GPIO_WritePin(STATUS_GPIO_Port, STATUS_Pin, GPIO_PIN_SET);
-	}
-	
-	if (ms == 1000) ms = 0;
+
   /* USER CODE END SysTick_IRQn 1 */
 }
 

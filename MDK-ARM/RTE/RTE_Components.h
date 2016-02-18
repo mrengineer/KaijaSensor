@@ -4,7 +4,7 @@
  *      *** Do not modify ! ***
  *
  * Project: 'FW' 
- * Target:  'FW Configuration' 
+ * Target:  'FW' 
  */
 
 #ifndef RTE_COMPONENTS_H

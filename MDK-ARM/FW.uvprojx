@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>FW Configuration</TargetName>
+      <TargetName>FW</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <pCCUsed>5060020::V5.06 (build 20)::ARMCC</pCCUsed>
@@ -47,11 +47,11 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>FW Configuration\</OutputDirectory>
-          <OutputName>FW Configuration</OutputName>
+          <OutputDirectory>FW\</OutputDirectory>
+          <OutputName>FW</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>1</CreateHexFile>
+          <CreateHexFile>0</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath></ListingPath>
@@ -131,11 +131,11 @@
             <RunToMain>1</RunToMain>
             <RestoreBreakpoints>1</RestoreBreakpoints>
             <RestoreWatchpoints>1</RestoreWatchpoints>
-            <RestoreMemoryDisplay>0</RestoreMemoryDisplay>
+            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
             <RestoreFunctions>1</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
             <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
-            <RestoreSysVw>0</RestoreSysVw>
+            <RestoreSysVw>1</RestoreSysVw>
           </Simulator>
           <Target>
             <UseTarget>1</UseTarget>
@@ -143,11 +143,11 @@
             <RunToMain>1</RunToMain>
             <RestoreBreakpoints>1</RestoreBreakpoints>
             <RestoreWatchpoints>1</RestoreWatchpoints>
-            <RestoreMemoryDisplay>0</RestoreMemoryDisplay>
+            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
             <RestoreFunctions>1</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
             <RestoreTracepoints>1</RestoreTracepoints>
-            <RestoreSysVw>0</RestoreSysVw>
+            <RestoreSysVw>1</RestoreSysVw>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
           <TargetSelection>11</TargetSelection>
@@ -174,11 +174,11 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4103</DriverSelection>
+            <DriverSelection>4107</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>STLink\ST-LINKIII-KEIL_SWO.dll</Flash2>
-          <Flash3>"" ()</Flash3>
+          <Flash3></Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -227,7 +227,7 @@
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>0</useUlib>
+            <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
@@ -373,7 +373,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_HAL_DRIVER,STM32L151xD</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;     ../Drivers/STM32L1xx_HAL_Driver/Inc;     ../Drivers/STM32L1xx_HAL_Driver/Inc/Legacy;     ../Middlewares/Third_Party/FatFs/src/drivers;     ../Middlewares/Third_Party/FatFs/src;     ../Drivers/CMSIS/Include;     ../Drivers/CMSIS/Device/ST/STM32L1xx/Include</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32L1xx_HAL_Driver/Inc;../Drivers/STM32L1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FatFs/src/drivers;../Middlewares/Third_Party/FatFs/src;../Drivers/CMSIS/Include;../Drivers/CMSIS/Device/ST/STM32L1xx/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -414,47 +414,42 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>Application/User</GroupName>
+          <GroupName>Application/MDK-ARM</GroupName>
           <Files>
             <File>
-              <FileName>fatfs.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/fatfs.c</FilePath>
-            </File>
-            <File>
-              <FileName>bsp_driver_sd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/bsp_driver_sd.c</FilePath>
-            </File>
-            <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/main.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_it.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/stm32l1xx_it.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_hal_msp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/stm32l1xx_hal_msp.c</FilePath>
-            </File>
-            <File>
-              <FileName>user_diskio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/user_diskio.c</FilePath>
+              <FileName>startup_stm32l151xd.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>startup_stm32l151xd.s</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>Drivers/CMSIS</GroupName>
+          <GroupName>Middlewares/FatFs</GroupName>
           <Files>
             <File>
-              <FileName>system_stm32l1xx.c</FileName>
+              <FileName>diskio.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/system_stm32l1xx.c</FilePath>
+              <FilePath>../Middlewares/Third_Party/FatFs/src/diskio.c</FilePath>
+            </File>
+            <File>
+              <FileName>ff_gen_drv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Middlewares/Third_Party/FatFs/src/ff_gen_drv.c</FilePath>
+            </File>
+            <File>
+              <FileName>sd_diskio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.c</FilePath>
+            </File>
+            <File>
+              <FileName>syscall.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Middlewares/Third_Party/FatFs/src/option/syscall.c</FilePath>
+            </File>
+            <File>
+              <FileName>ff.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Middlewares/Third_Party/FatFs/src/ff.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -467,74 +462,9 @@
               <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_gpio.c</FilePath>
             </File>
             <File>
-              <FileName>stm32l1xx_hal_pwr_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_pwr_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_ll_sdmmc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_ll_sdmmc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_hal_flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_flash.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_hal_spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_hal_rcc_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_rcc_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_hal_rcc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_rcc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_hal_flash_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_flash_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_hal_adc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_adc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_hal_pwr.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_pwr.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_hal_flash_ramfunc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_flash_ramfunc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_hal_dma.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_dma.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_hal_spi_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_spi_ex.c</FilePath>
-            </File>
-            <File>
               <FileName>stm32l1xx_hal_cortex.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_cortex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32l1xx_hal_sd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_sd.c</FilePath>
             </File>
             <File>
               <FileName>stm32l1xx_hal.c</FileName>
@@ -547,49 +477,134 @@
               <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_adc_ex.c</FilePath>
             </File>
             <File>
+              <FileName>stm32l1xx_hal_pwr_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_pwr_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_rtc_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_rtc_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_dma.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32l1xx_hal_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_uart.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32l1xx_hal_flash_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_flash_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_rcc_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_rcc_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_tim_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_tim_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_rtc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_rcc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_rcc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_spi_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_spi_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_flash.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_ll_sdmmc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_ll_sdmmc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_pwr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_pwr.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_sd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_sd.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l1xx_hal_flash_ramfunc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_flash_ramfunc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>Middlewares/FatFs</GroupName>
+          <GroupName>Application/User</GroupName>
           <Files>
             <File>
-              <FileName>ff.c</FileName>
+              <FileName>stm32l1xx_it.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Middlewares/Third_Party/FatFs/src/ff.c</FilePath>
+              <FilePath>../Src/stm32l1xx_it.c</FilePath>
             </File>
             <File>
-              <FileName>diskio.c</FileName>
+              <FileName>bsp_driver_sd.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Middlewares/Third_Party/FatFs/src/diskio.c</FilePath>
+              <FilePath>../Src/bsp_driver_sd.c</FilePath>
             </File>
             <File>
-              <FileName>syscall.c</FileName>
+              <FileName>stm32l1xx_hal_msp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Middlewares/Third_Party/FatFs/src/option/syscall.c</FilePath>
+              <FilePath>../Src/stm32l1xx_hal_msp.c</FilePath>
             </File>
             <File>
-              <FileName>sd_diskio.c</FileName>
+              <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.c</FilePath>
+              <FilePath>../Src/main.c</FilePath>
             </File>
             <File>
-              <FileName>ff_gen_drv.c</FileName>
+              <FileName>fatfs.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Middlewares/Third_Party/FatFs/src/ff_gen_drv.c</FilePath>
+              <FilePath>../Src/fatfs.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>Application/MDK-ARM</GroupName>
+          <GroupName>Drivers/CMSIS</GroupName>
           <Files>
             <File>
-              <FileName>startup_stm32l151xd.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/arm/startup_stm32l151xd.s</FilePath>
+              <FileName>system_stm32l1xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/system_stm32l1xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -606,7 +621,7 @@
       <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="4.1.0" condition="CMSIS Core">
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="4.3.0"/>
         <targetInfos>
-          <targetInfo name="FW Configuration"/>
+          <targetInfo name="FW"/>
         </targetInfos>
       </component>
     </components>

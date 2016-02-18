@@ -35,8 +35,6 @@
 
 uint8_t retSD;    /* Return value for SD */
 char SD_Path[4];  /* SD logical drive path */
-uint8_t retUSER;    /* Return value for USER */
-char USER_Path[4];  /* USER logical drive path */
 
 /* USER CODE BEGIN Variables */
 
@@ -46,38 +44,9 @@ void MX_FATFS_Init(void)
 {
   /*## FatFS: Link the SD driver ###########################*/
   retSD = FATFS_LinkDriver(&SD_Driver, SD_Path);
-  /*## FatFS: Link the USER driver ###########################*/
- // retUSER = FATFS_LinkDriver(&USER_Driver, USER_Path);
 
   /* USER CODE BEGIN Init */
-    //Fatfs object
-    FATFS FatFs;
-    //File object
-    FIL fil;
-
-     
-  
-    if (f_mount(&FatFs, "S", 1) == FR_OK) {
-        //Mounted OK, turn on RED LED
-			//	HAL_GPIO_WritePin(INDICATOR2_GPIO_Port, INDICATOR2_Pin, GPIO_PIN_SET);
-        
-        //Try to open file
-        if (f_open(&fil, "1stfile.txt", FA_OPEN_ALWAYS | FA_READ | FA_WRITE) == FR_OK) {
-            //File opened, turn off RED and turn on GREEN led
-
-            /*
-            //If we put more than 0 characters (everything OK)
-            if (f_puts("First string in my file\n", &fil) > 0) {
-
-            }
-            
-            //Close file, don't forget this!*/
-            f_close(&fil);
-        }
-        
-        //Unmount drive, don't forget this! 
-        f_mount(0, "", 1);
-    }
+  /* additional user code for init */     
   /* USER CODE END Init */
 }
 

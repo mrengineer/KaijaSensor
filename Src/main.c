@@ -47,30 +47,32 @@
 #define DISABLE_2_5V				HAL_GPIO_WritePin(ENABLE_2_5V_GPIO_Port, ENABLE_2_5V_Pin, GPIO_PIN_RESET)
 
 // Magnetic sensors		----------------------------------------------------------------------------------------
+//Power management
 #define CLAMP_SENS_PWR_ON		HAL_GPIO_WritePin(HALL_CLAMP_PWR_GPIO_Port, HALL_CLAMP_PWR_Pin, GPIO_PIN_SET)
 #define CLAMP_SENS_PWR_OFF	HAL_GPIO_WritePin(HALL_CLAMP_PWR_GPIO_Port, HALL_CLAMP_PWR_Pin, GPIO_PIN_RESET)
-
 #define HALL_SENS_PWR_ON		HAL_GPIO_WritePin(HALL_SENS_PWR_GPIO_Port, HALL_SENS_PWR_Pin, GPIO_PIN_SET)
 #define HALL_SENS_PWR_OFF		HAL_GPIO_WritePin(HALL_SENS_PWR_GPIO_Port, HALL_SENS_PWR_Pin, GPIO_PIN_RESET)
 
-#define IS_SENS_CLAMP_A_ON 	HAL_GPIO_ReadPin(SENS_CLAMP_A_GPIO_Port, SENS_CLAMP_A_Pin) 	== GPIO_PIN_RESET			//Sensor gives + when no magnetic field
-#define IS_SENS_CLAMP_B_ON 	HAL_GPIO_ReadPin(SENS_CLAMP_B_GPIO_Port, SENS_CLAMP_B_Pin) 	== GPIO_PIN_RESET			//Sensor gives + when no magnetic field
+//Read sensors
+#define IS_SENS_CLAMP_A_ON 	HAL_GPIO_ReadPin(SENS_CLAMP_A_GPIO_Port, SENS_CLAMP_A_Pin) 	== GPIO_PIN_RESET				//Sensor gives + when no magnetic field
+#define IS_SENS_CLAMP_B_ON 	HAL_GPIO_ReadPin(SENS_CLAMP_B_GPIO_Port, SENS_CLAMP_B_Pin) 	== GPIO_PIN_RESET				//Sensor gives + when no magnetic field
+#define IS_SENS_OPEN_ON		 	HAL_GPIO_ReadPin(SENS_OPEN_GPIO_Port, 		SENS_OPEN_Pin) 		== GPIO_PIN_RESET				//Sensor gives + when no magnetic field
+#define IS_SENS_TAKEOFF_ON	HAL_GPIO_ReadPin(SENS_TAKEOFF_GPIO_Port, 	SENS_TAKEOFF_Pin) == GPIO_PIN_RESET				//Sensor gives + when no magnetic field
 
-#define IS_SENS_OPEN_ON		 	HAL_GPIO_ReadPin(SENS_OPEN_GPIO_Port, 		SENS_OPEN_Pin) 		== GPIO_PIN_RESET			//Sensor gives + when no magnetic field
-#define IS_SENS_TAKEOFF_ON	HAL_GPIO_ReadPin(SENS_TAKEOFF_GPIO_Port, 	SENS_TAKEOFF_Pin) == GPIO_PIN_RESET			//Sensor gives + when no magnetic field
-
-//Indictaors		--------------------------------------------------------------------------------------------
+//Indictaors		---------------------------------------------------------------------------------------------
 #define IND1_ON							HAL_GPIO_WritePin(INDICATOR1_GPIO_Port, INDICATOR1_Pin, GPIO_PIN_SET)
 #define IND1_OFF						HAL_GPIO_WritePin(INDICATOR1_GPIO_Port, INDICATOR1_Pin, GPIO_PIN_RESET)
 
 #define IND2_ON							HAL_GPIO_WritePin(INDICATOR2_GPIO_Port, INDICATOR2_Pin, GPIO_PIN_SET)
 #define IND2_OFF						HAL_GPIO_WritePin(INDICATOR2_GPIO_Port, INDICATOR2_Pin, GPIO_PIN_RESET)
 
-#define IND3_ON							HAL_GPIO_WritePin(INDICATOR3_GPIO_Port, INDICATOR3_Pin, GPIO_PIN_SET)   //Signal trough transistor Q1
+#define IND3_ON							HAL_GPIO_WritePin(INDICATOR3_GPIO_Port, INDICATOR3_Pin, GPIO_PIN_SET)   
 #define IND3_OFF						HAL_GPIO_WritePin(INDICATOR3_GPIO_Port, INDICATOR3_Pin, GPIO_PIN_RESET)
 
-//SD card
-//Do not forget enable 2.5 V for power supply and switch uC to higher voltage in order to meet IO signals of memory card!
+#define IND4_ON							HAL_GPIO_WritePin(STATUS_GPIO_Port, STATUS_Pin, GPIO_PIN_SET)  
+#define IND4_OFF						HAL_GPIO_WritePin(STATUS_GPIO_Port, STATUS_Pin, GPIO_PIN_RESET)
+
+//SD card	Do not forget enable 2.5 V for power supply and switch uC to higher voltage in order to meet IO signals of memory card!
 #define SD_PWR_ON						HAL_GPIO_WritePin(SD_PWR_GPIO_Port, SD_PWR_Pin, GPIO_PIN_RESET)
 #define SD_PWR_OFF					HAL_GPIO_WritePin(SD_PWR_GPIO_Port, SD_PWR_Pin, GPIO_PIN_SET)
 /* USER CODE END Includes */
@@ -89,7 +91,11 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+FATFS SDFatFs;  /* File system object for SD card logical drive */
+FIL MyFile;     /* File object */
+char SDPath[4]; /* SD card logical drive path */
 
+const char wtext[] = "Hello World!";
 
 
 
@@ -118,7 +124,13 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+	
+	FRESULT res; /* FatFs function common result code */
+	uint32_t byteswritten, bytesread; /* File write/read counts */
+	char rtext[256]; /* File read buffer */
+	
+	//	HALL_SENS_PWR_ON;
+	//	CLAMP_SENS_PWR_ON;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -131,20 +143,8 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_ADC_Init();
-	
-	ENABLE_2_5V;	//Power for uSD WIFI BLE...
-	UC_2_9V;			//High I/O voltage for uC
-	//SD_PWR_ON;		//Power to uSD
-	HAL_Delay(100);
-	
-	
-  MX_SDIO_SD_Init();
-  MX_SPI1_Init();
-  MX_SPI2_Init();
-  MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
-  MX_FATFS_Init();
+ // MX_ADC_Init();
+
 
   /* USER CODE BEGIN 2 */
 	
@@ -157,7 +157,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 	  /* USER CODE BEGIN 2 */
 	//HALL_SENS_PWR_ON;
-	//CLAMP_SENS_PWR_OFF;
+	//CLAMP_SENS_PWR_ON;
   /* USER CODE END 2 */
 	
 	// UC power change - fail
@@ -166,20 +166,101 @@ int main(void)
 	// power DC/DC domain 2.5V OK @ uC at 2.9V
 	// D/C 1.8..2.9V ok
 	
-	//UC_2_8V;	//	//minimal power
-  while (1){
-		
-		
-/*		IND1_OFF;
+	// init gpio before!
+	UC_1_8V;			//minimal power
+	ENABLE_2_5V;	//DC-DC enable
+	SD_PWR_ON;		//Power to SD card
+	//INIT SD and CARD after because no power to sd
+	
+	HAL_Delay(50);
+    MX_SDIO_SD_Init();
+ // MX_SPI1_Init();
+ // MX_SPI2_Init();
+//  MX_USART1_UART_Init();
+//  MX_USART2_UART_Init();
+  MX_FATFS_Init();
+	
+/*##-1- FatFS: Link the SD disk I/O driver ##########*/
+ 
+ if(FATFS_LinkDriver(&SD_Driver, SDPath) == 0){
+		/* success: set the orange LED on */
+		 //HAL_GPIO_WritePin(GPIOG, GPIO_PIN_7, GPIO_PIN_RESET);
+		/*##-2- Register the file system object to the FatFs module 
+	 
+		NB! mout right now!
+	 ###*/
+		res = f_mount(&SDFatFs, (TCHAR const*)SD_Path, 1) ;
+	 
+		 if(res != FR_OK){
+				 /* FatFs Initialization Error : set the red LED on */
+				 IND1_ON;
+				 while(1);
+		 } else {
+				/*##-3- Create a FAT file system (format) on the logical drive#*/
+				 /* WARNING: Formatting the uSD card will delete all content on the device */
+					res = f_mkfs((TCHAR const*)SD_Path, 0, 0);
+					if(res != FR_OK){
+						 /* FatFs Format Error : set the red LED on */
+				//		 ORANGE_ON;
+						IND1_ON;
+						 while(1);
+					} else {
+						/*##-4- Create & Open a new text file object with write access#*/
+						 if(f_open(&MyFile, "Hello.txt", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK){
+								 /* 'Hello.txt' file Open for write Error : set the red LED on */
+								 IND2_ON;
+								 while(1);
+						 } else {
+								 /*##-5- Write data to the text file ####################*/
+								 res = f_write(&MyFile, wtext, sizeof(wtext), (void*)&byteswritten);
+									 
+								 if((byteswritten == 0) || (res != FR_OK)){
+										 /* 'Hello.txt' file Write or EOF Error : set the red LED on */
+										 IND3_ON;
+										 while(1);
+								 } else {
+									 
+										 /*##-6- Successful open/write : set the blue LED on */
+										// HAL_GPIO_WritePin(GPIOG, GPIO_PIN_12, GPIO_PIN_RESET);
+										 f_close(&MyFile);
+									 
+										 /*##-7- Open the text file object with read access #*/
+										 if(f_open(&MyFile, "Hello.txt", FA_READ) != FR_OK){
+												 /* 'Hello.txt' file Open for read Error : set the red LED on */
+												//HAL_GPIO_WritePin(GPIOG, GPIO_PIN_10, GPIO_PIN_RESET);
+												 while(1);
+										 } else {
+												 /*##-8- Read data from the text file #########*/
+												 res = f_read(&MyFile, rtext, sizeof(wtext), &bytesread);
+												 if((strcmp(rtext,wtext)!=0)|| (res != FR_OK)){
+													 /* 'Hello.txt' file Read or EOF Error : set the red LED on */
+													 //HAL_GPIO_WritePin(GPIOG, GPIO_PIN_10, GPIO_PIN_RESET);
+													 while(1);
+												 } else {
+													 /* Successful read : set the green LED On */
+													 //HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);
+													 /*##-9- Close the open text file ################*/
+													 f_close(&MyFile);
+												 }
+										 }
+								 }
+						 }
+				 }
+		 }
+ }
+ /*##-10- Unlink the micro SD disk I/O driver #########*/
+ FATFS_UnLinkDriver(SD_Path);
+	
+ IND4_ON;
 
-		IND2_OFF;
+	while (1){
 
+//		if (IS_SENS_CLAMP_A_ON) IND3_ON; else IND3_OFF;
+//		if (IS_SENS_CLAMP_B_ON)	IND2_ON; else IND2_OFF;
+//		if (IS_SENS_OPEN_ON) 		IND1_ON; else IND1_OFF;
+//		if (IS_SENS_TAKEOFF_ON) IND4_ON; else IND4_OFF;
 
-		IND3_OFF;
-		if (IS_SENS_CLAMP_A_ON || IS_SENS_CLAMP_B_ON) IND1_ON;
-		if (IS_SENS_OPEN_ON) IND2_ON;
-		if (IS_SENS_TAKEOFF_ON) IND3_ON;*/
-
+		//HAL_Delay(1000);
 		
 		//		printf("TEST\r\n");
 		
@@ -214,12 +295,13 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLDIV = RCC_PLL_DIV3;
   HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-  HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1);
+  HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
 
   HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 
@@ -277,7 +359,7 @@ void MX_SDIO_SD_Init(void)
   hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
   hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
   hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd.Init.ClockDiv = 0;
+  hsd.Init.ClockDiv = 100;
 
 }
 
@@ -291,7 +373,7 @@ void MX_SPI1_Init(void)
   hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi1.Init.NSS = SPI_NSS_HARD_INPUT;
   hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLED;
@@ -311,7 +393,7 @@ void MX_SPI2_Init(void)
   hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi2.Init.NSS = SPI_NSS_HARD_INPUT;
   hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLED;
@@ -371,8 +453,22 @@ void MX_GPIO_Init(void)
   __GPIOB_CLK_ENABLE();
   __GPIOD_CLK_ENABLE();
 
-  /*Configure GPIO pins : nDISCHARGE_Pin PWR_TO_2_8V_Pin ENABLE_2_5V_Pin */
-  GPIO_InitStruct.Pin = nDISCHARGE_Pin|PWR_TO_2_8V_Pin|ENABLE_2_5V_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, nDISCHARGE_Pin|PWR_TO_2_8V_Pin|ENABLE_2_5V_Pin|INDICATOR2_Pin 
+                          |WIFI_PWR_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, STATUS_Pin|HALL_CLAMP_PWR_Pin|RF_PWR_Pin|INDICATOR3_Pin 
+                          |SD_PWR_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, SHUNT_0_06_DISABLE_Pin|HALL_SENS_PWR_Pin|RF_CE_Pin|PWR_TO2_8AND2_9V_Pin 
+                          |INDICATOR1_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : nDISCHARGE_Pin PWR_TO_2_8V_Pin ENABLE_2_5V_Pin INDICATOR2_Pin 
+                           WIFI_PWR_Pin */
+  GPIO_InitStruct.Pin = nDISCHARGE_Pin|PWR_TO_2_8V_Pin|ENABLE_2_5V_Pin|INDICATOR2_Pin 
+                          |WIFI_PWR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
@@ -387,11 +483,17 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SENS_CLAMP_A_Pin SENS_TAKEOFF_Pin */
-  GPIO_InitStruct.Pin = SENS_CLAMP_A_Pin|SENS_TAKEOFF_Pin;
+  /*Configure GPIO pin : SENS_CLAMP_A_Pin */
+  GPIO_InitStruct.Pin = SENS_CLAMP_A_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(SENS_CLAMP_A_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : SENS_TAKEOFF_Pin */
+  GPIO_InitStruct.Pin = SENS_TAKEOFF_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(SENS_TAKEOFF_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SHUNT_0_06_DISABLE_Pin HALL_SENS_PWR_Pin RF_CE_Pin PWR_TO2_8AND2_9V_Pin 
                            INDICATOR1_Pin */
@@ -402,11 +504,23 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SENS_CLAMP_B_Pin RF_IRQ_Pin */
-  GPIO_InitStruct.Pin = SENS_CLAMP_B_Pin|RF_IRQ_Pin;
+  /*Configure GPIO pin : SENS_CLAMP_B_Pin */
+  GPIO_InitStruct.Pin = SENS_CLAMP_B_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(SENS_CLAMP_B_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : RF_IRQ_Pin */
+  GPIO_InitStruct.Pin = RF_IRQ_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(RF_IRQ_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : SENS_OPEN_Pin */
+  GPIO_InitStruct.Pin = SENS_OPEN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(SENS_OPEN_GPIO_Port, &GPIO_InitStruct);
 
 }
 

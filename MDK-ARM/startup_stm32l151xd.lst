@@ -90,7 +90,7 @@ ARM Macro Assembler    Page 2
    50 00000000         
    51 00000000 00000400 
                        Stack_Size
-                               EQU              0x00000400
+                               EQU              0x400
    52 00000000         
    53 00000000                 AREA             STACK, NOINIT, READWRITE, ALIGN
 =3
@@ -103,23 +103,23 @@ ARM Macro Assembler    Page 2
    59 00000400         ;   <o>  Heap Size (in Bytes) <0x0-0xFFFFFFFF:8>
    60 00000400         ; </h>
    61 00000400         
-   62 00000400 00000200 
+   62 00000400 00000800 
                        Heap_Size
-                               EQU              0x00000200
+                               EQU              0x800
    63 00000400         
    64 00000400                 AREA             HEAP, NOINIT, READWRITE, ALIGN=
 3
    65 00000000         __heap_base
    66 00000000         Heap_Mem
                                SPACE            Heap_Size
-   67 00000200         __heap_limit
-   68 00000200         
-   69 00000200                 PRESERVE8
-   70 00000200                 THUMB
-   71 00000200         
-   72 00000200         
-   73 00000200         ; Vector Table Mapped to Address 0 at Reset
-   74 00000200                 AREA             RESET, DATA, READONLY
+   67 00000800         __heap_limit
+   68 00000800         
+   69 00000800                 PRESERVE8
+   70 00000800                 THUMB
+   71 00000800         
+   72 00000800         
+   73 00000800         ; Vector Table Mapped to Address 0 at Reset
+   74 00000800                 AREA             RESET, DATA, READONLY
    75 00000000                 EXPORT           __Vectors
    76 00000000                 EXPORT           __Vectors_End
    77 00000000                 EXPORT           __Vectors_Size
@@ -277,9 +277,9 @@ ARM Macro Assembler    Page 5
 ]
   164 00000000                 IMPORT           __main
   165 00000000                 IMPORT           SystemInit
-  166 00000000 4809            LDR              R0, =SystemInit
+  166 00000000 4806            LDR              R0, =SystemInit
   167 00000002 4780            BLX              R0
-  168 00000004 4809            LDR              R0, =__main
+  168 00000004 4806            LDR              R0, =__main
   169 00000006 4700            BX               R0
   170 00000008                 ENDP
   171 00000008         
@@ -547,36 +547,23 @@ ARM Macro Assembler    Page 9
   338 0000001C         ;*******************************************************
                        ************************
   339 0000001C                 IF               :DEF:__MICROLIB
-  346 0000001C         
-  347 0000001C                 IMPORT           __use_two_region_memory
-  348 0000001C                 EXPORT           __user_initial_stackheap
-  349 0000001C         
-  350 0000001C         __user_initial_stackheap
-  351 0000001C         
-  352 0000001C 4804            LDR              R0, =  Heap_Mem
-  353 0000001E 4905            LDR              R1, =(Stack_Mem + Stack_Size)
-  354 00000020 4A05            LDR              R2, = (Heap_Mem +  Heap_Size)
-  355 00000022 4B06            LDR              R3, = Stack_Mem
-  356 00000024 4770            BX               LR
-  357 00000026         
-  358 00000026 00 00           ALIGN
-  359 00000028         
-  360 00000028                 ENDIF
-  361 00000028         
-  362 00000028                 END
+  340 0000001C         
+  341 0000001C                 EXPORT           __initial_sp
+  342 0000001C                 EXPORT           __heap_base
+  343 0000001C                 EXPORT           __heap_limit
+  344 0000001C         
+  345 0000001C                 ELSE
+  360                          ENDIF
+  361 0000001C         
+  362 0000001C                 END
               00000000 
-              00000000 
-              00000000 
-              00000400 
-              00000200 
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
-ork --depend="fw configuration\startup_stm32l151xd.d" -o"fw configuration\start
-up_stm32l151xd.o" -IC:\Sensor\FW\MDK-ARM\RTE -IC:\Keil\ARM\PACK\ARM\CMSIS\4.5.0
-\CMSIS\Include -IC:\Keil\ARM\PACK\Keil\STM32L1xx_DFP\1.0.2\Device\Include --pre
+ork --depend=fw\startup_stm32l151xd.d -ofw\startup_stm32l151xd.o -IC:\Sensor\FW
+\MDK-ARM\RTE -IC:\Keil\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include -IC:\Keil\ARM\PAC
+K\Keil\STM32L1xx_DFP\1.0.2\Device\Include --predefine="__MICROLIB SETA 1" --pre
 define="__UVISION_VERSION SETA 516" --predefine="_RTE_ SETA 1" --predefine="STM
-32L1XX_HD SETA 1" --list=startup_stm32l151xd.lst ../Drivers/CMSIS/Device/ST/STM
-32L1xx/Source/Templates/arm/startup_stm32l151xd.s
+32L1XX_HD SETA 1" --list=startup_stm32l151xd.lst startup_stm32l151xd.s
 
 
 
@@ -587,8 +574,7 @@ STACK 00000000
 
 Symbol: STACK
    Definitions
-      At line 53 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
+      At line 53 in file startup_stm32l151xd.s
    Uses
       None
 Comment: STACK unused
@@ -596,24 +582,19 @@ Stack_Mem 00000000
 
 Symbol: Stack_Mem
    Definitions
-      At line 54 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
+      At line 54 in file startup_stm32l151xd.s
    Uses
-      At line 353 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 355 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
+      None
+Comment: Stack_Mem unused
 __initial_sp 00000400
 
 Symbol: __initial_sp
    Definitions
-      At line 55 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
+      At line 55 in file startup_stm32l151xd.s
    Uses
-      At line 79 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-Comment: __initial_sp used once
+      At line 79 in file startup_stm32l151xd.s
+      At line 341 in file startup_stm32l151xd.s
+
 3 symbols
 
 
@@ -625,8 +606,7 @@ HEAP 00000000
 
 Symbol: HEAP
    Definitions
-      At line 64 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
+      At line 64 in file startup_stm32l151xd.s
    Uses
       None
 Comment: HEAP unused
@@ -634,32 +614,26 @@ Heap_Mem 00000000
 
 Symbol: Heap_Mem
    Definitions
-      At line 66 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
+      At line 66 in file startup_stm32l151xd.s
    Uses
-      At line 352 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 354 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
+      None
+Comment: Heap_Mem unused
 __heap_base 00000000
 
 Symbol: __heap_base
    Definitions
-      At line 65 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
+      At line 65 in file startup_stm32l151xd.s
    Uses
-      None
-Comment: __heap_base unused
-__heap_limit 00000200
+      At line 342 in file startup_stm32l151xd.s
+Comment: __heap_base used once
+__heap_limit 00000800
 
 Symbol: __heap_limit
    Definitions
-      At line 67 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
+      At line 67 in file startup_stm32l151xd.s
    Uses
-      None
-Comment: __heap_limit unused
+      At line 343 in file startup_stm32l151xd.s
+Comment: __heap_limit used once
 4 symbols
 
 
@@ -671,8 +645,7 @@ RESET 00000000
 
 Symbol: RESET
    Definitions
-      At line 74 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
+      At line 74 in file startup_stm32l151xd.s
    Uses
       None
 Comment: RESET unused
@@ -680,25 +653,19 @@ __Vectors 00000000
 
 Symbol: __Vectors
    Definitions
-      At line 79 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
+      At line 79 in file startup_stm32l151xd.s
    Uses
-      At line 75 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 157 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 75 in file startup_stm32l151xd.s
+      At line 157 in file startup_stm32l151xd.s
 
 __Vectors_End 00000124
 
 Symbol: __Vectors_End
    Definitions
-      At line 155 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 155 in file startup_stm32l151xd.s
    Uses
-      At line 76 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 157 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 76 in file startup_stm32l151xd.s
+      At line 157 in file startup_stm32l151xd.s
 
 3 symbols
 
@@ -711,8 +678,7 @@ Relocatable symbols
 
 Symbol: .text
    Definitions
-      At line 159 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 159 in file startup_stm32l151xd.s
    Uses
       None
 Comment: .text unused
@@ -720,442 +686,443 @@ ADC1_IRQHandler 0000001A
 
 Symbol: ADC1_IRQHandler
    Definitions
-      At line 292 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 292 in file startup_stm32l151xd.s
    Uses
-      At line 115 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 236 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 115 in file startup_stm32l151xd.s
+      At line 236 in file startup_stm32l151xd.s
 
 BusFault_Handler 0000000E
 
 Symbol: BusFault_Handler
    Definitions
-      At line 189 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 189 in file startup_stm32l151xd.s
    Uses
-      At line 84 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 190 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 84 in file startup_stm32l151xd.s
+      At line 190 in file startup_stm32l151xd.s
 
 COMP_ACQ_IRQHandler 0000001A
 
 Symbol: COMP_ACQ_IRQHandler
    Definitions
-      At line 328 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 328 in file startup_stm32l151xd.s
    Uses
-      At line 153 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 272 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 153 in file startup_stm32l151xd.s
+      At line 272 in file startup_stm32l151xd.s
 
 COMP_IRQHandler 0000001A
 
 Symbol: COMP_IRQHandler
    Definitions
-      At line 296 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 296 in file startup_stm32l151xd.s
    Uses
-      At line 119 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 240 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 119 in file startup_stm32l151xd.s
+      At line 240 in file startup_stm32l151xd.s
 
 DAC_IRQHandler 0000001A
 
+Symbol: DAC_IRQHandler
+   Definitions
+      At line 295 in file startup_stm32l151xd.s
+   Uses
+      At line 118 in file startup_stm32l151xd.s
+      At line 239 in file startup_stm32l151xd.s
+
+DMA1_Channel1_IRQHandler 0000001A
+
+Symbol: DMA1_Channel1_IRQHandler
+   Definitions
+      At line 285 in file startup_stm32l151xd.s
+   Uses
 
 
 
 ARM Macro Assembler    Page 2 Alphabetic symbol ordering
 Relocatable symbols
 
-Symbol: DAC_IRQHandler
-   Definitions
-      At line 295 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 118 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 239 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-DMA1_Channel1_IRQHandler 0000001A
-
-Symbol: DMA1_Channel1_IRQHandler
-   Definitions
-      At line 285 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 108 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 229 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 108 in file startup_stm32l151xd.s
+      At line 229 in file startup_stm32l151xd.s
 
 DMA1_Channel2_IRQHandler 0000001A
 
 Symbol: DMA1_Channel2_IRQHandler
    Definitions
-      At line 286 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 286 in file startup_stm32l151xd.s
    Uses
-      At line 109 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 230 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 109 in file startup_stm32l151xd.s
+      At line 230 in file startup_stm32l151xd.s
 
 DMA1_Channel3_IRQHandler 0000001A
 
 Symbol: DMA1_Channel3_IRQHandler
    Definitions
-      At line 287 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 287 in file startup_stm32l151xd.s
    Uses
-      At line 110 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 231 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 110 in file startup_stm32l151xd.s
+      At line 231 in file startup_stm32l151xd.s
 
 DMA1_Channel4_IRQHandler 0000001A
 
 Symbol: DMA1_Channel4_IRQHandler
    Definitions
-      At line 288 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 288 in file startup_stm32l151xd.s
    Uses
-      At line 111 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 232 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 111 in file startup_stm32l151xd.s
+      At line 232 in file startup_stm32l151xd.s
 
 DMA1_Channel5_IRQHandler 0000001A
+
+Symbol: DMA1_Channel5_IRQHandler
+   Definitions
+      At line 289 in file startup_stm32l151xd.s
+   Uses
+      At line 112 in file startup_stm32l151xd.s
+      At line 233 in file startup_stm32l151xd.s
+
+DMA1_Channel6_IRQHandler 0000001A
+
+Symbol: DMA1_Channel6_IRQHandler
+   Definitions
+      At line 290 in file startup_stm32l151xd.s
+   Uses
+      At line 113 in file startup_stm32l151xd.s
+      At line 234 in file startup_stm32l151xd.s
+
+DMA1_Channel7_IRQHandler 0000001A
+
+Symbol: DMA1_Channel7_IRQHandler
+   Definitions
+      At line 291 in file startup_stm32l151xd.s
+   Uses
+      At line 114 in file startup_stm32l151xd.s
+      At line 235 in file startup_stm32l151xd.s
+
+DMA2_Channel1_IRQHandler 0000001A
+
 
 
 
 ARM Macro Assembler    Page 3 Alphabetic symbol ordering
 Relocatable symbols
 
-
-Symbol: DMA1_Channel5_IRQHandler
-   Definitions
-      At line 289 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 112 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 233 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-DMA1_Channel6_IRQHandler 0000001A
-
-Symbol: DMA1_Channel6_IRQHandler
-   Definitions
-      At line 290 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 113 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 234 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-DMA1_Channel7_IRQHandler 0000001A
-
-Symbol: DMA1_Channel7_IRQHandler
-   Definitions
-      At line 291 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 114 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 235 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-DMA2_Channel1_IRQHandler 0000001A
-
 Symbol: DMA2_Channel1_IRQHandler
    Definitions
-      At line 323 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 323 in file startup_stm32l151xd.s
    Uses
-      At line 147 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 267 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 147 in file startup_stm32l151xd.s
+      At line 267 in file startup_stm32l151xd.s
 
 DMA2_Channel2_IRQHandler 0000001A
 
 Symbol: DMA2_Channel2_IRQHandler
    Definitions
-      At line 324 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 324 in file startup_stm32l151xd.s
    Uses
-      At line 148 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 268 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 148 in file startup_stm32l151xd.s
+      At line 268 in file startup_stm32l151xd.s
 
+DMA2_Channel3_IRQHandler 0000001A
+
+Symbol: DMA2_Channel3_IRQHandler
+   Definitions
+      At line 325 in file startup_stm32l151xd.s
+   Uses
+      At line 149 in file startup_stm32l151xd.s
+      At line 269 in file startup_stm32l151xd.s
+
+DMA2_Channel4_IRQHandler 0000001A
+
+Symbol: DMA2_Channel4_IRQHandler
+   Definitions
+      At line 326 in file startup_stm32l151xd.s
+   Uses
+      At line 150 in file startup_stm32l151xd.s
+      At line 270 in file startup_stm32l151xd.s
+
+DMA2_Channel5_IRQHandler 0000001A
+
+Symbol: DMA2_Channel5_IRQHandler
+   Definitions
+      At line 327 in file startup_stm32l151xd.s
+   Uses
+      At line 151 in file startup_stm32l151xd.s
+      At line 271 in file startup_stm32l151xd.s
+
+DebugMon_Handler 00000014
+
+Symbol: DebugMon_Handler
+   Definitions
+      At line 203 in file startup_stm32l151xd.s
+   Uses
+      At line 91 in file startup_stm32l151xd.s
+      At line 204 in file startup_stm32l151xd.s
+
+Default_Handler 0000001A
+
+Symbol: Default_Handler
+   Definitions
+      At line 216 in file startup_stm32l151xd.s
+   Uses
+      None
 
 
 
 ARM Macro Assembler    Page 4 Alphabetic symbol ordering
 Relocatable symbols
 
-DMA2_Channel3_IRQHandler 0000001A
-
-Symbol: DMA2_Channel3_IRQHandler
-   Definitions
-      At line 325 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 149 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 269 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-DMA2_Channel4_IRQHandler 0000001A
-
-Symbol: DMA2_Channel4_IRQHandler
-   Definitions
-      At line 326 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 150 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 270 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-DMA2_Channel5_IRQHandler 0000001A
-
-Symbol: DMA2_Channel5_IRQHandler
-   Definitions
-      At line 327 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 151 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 271 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-DebugMon_Handler 00000014
-
-Symbol: DebugMon_Handler
-   Definitions
-      At line 203 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 91 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 204 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-Default_Handler 0000001A
-
-Symbol: Default_Handler
-   Definitions
-      At line 216 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      None
 Comment: Default_Handler unused
 EXTI0_IRQHandler 0000001A
 
+Symbol: EXTI0_IRQHandler
+   Definitions
+      At line 280 in file startup_stm32l151xd.s
+   Uses
+      At line 103 in file startup_stm32l151xd.s
+      At line 224 in file startup_stm32l151xd.s
+
+EXTI15_10_IRQHandler 0000001A
+
+Symbol: EXTI15_10_IRQHandler
+   Definitions
+      At line 313 in file startup_stm32l151xd.s
+   Uses
+      At line 137 in file startup_stm32l151xd.s
+      At line 257 in file startup_stm32l151xd.s
+
+EXTI1_IRQHandler 0000001A
+
+Symbol: EXTI1_IRQHandler
+   Definitions
+      At line 281 in file startup_stm32l151xd.s
+   Uses
+      At line 104 in file startup_stm32l151xd.s
+      At line 225 in file startup_stm32l151xd.s
+
+EXTI2_IRQHandler 0000001A
+
+Symbol: EXTI2_IRQHandler
+   Definitions
+      At line 282 in file startup_stm32l151xd.s
+   Uses
+      At line 105 in file startup_stm32l151xd.s
+      At line 226 in file startup_stm32l151xd.s
+
+EXTI3_IRQHandler 0000001A
+
+Symbol: EXTI3_IRQHandler
+   Definitions
+      At line 283 in file startup_stm32l151xd.s
+   Uses
+      At line 106 in file startup_stm32l151xd.s
+      At line 227 in file startup_stm32l151xd.s
+
+EXTI4_IRQHandler 0000001A
+
+Symbol: EXTI4_IRQHandler
+   Definitions
+      At line 284 in file startup_stm32l151xd.s
+   Uses
+      At line 107 in file startup_stm32l151xd.s
+      At line 228 in file startup_stm32l151xd.s
+
+EXTI9_5_IRQHandler 0000001A
+
+Symbol: EXTI9_5_IRQHandler
+   Definitions
 
 
 
 ARM Macro Assembler    Page 5 Alphabetic symbol ordering
 Relocatable symbols
 
-Symbol: EXTI0_IRQHandler
-   Definitions
-      At line 280 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 297 in file startup_stm32l151xd.s
    Uses
-      At line 103 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 224 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 120 in file startup_stm32l151xd.s
+      At line 241 in file startup_stm32l151xd.s
 
-EXTI15_10_IRQHandler 0000001A
+FLASH_IRQHandler 0000001A
 
-Symbol: EXTI15_10_IRQHandler
+Symbol: FLASH_IRQHandler
    Definitions
-      At line 313 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 278 in file startup_stm32l151xd.s
    Uses
-      At line 137 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 257 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 101 in file startup_stm32l151xd.s
+      At line 222 in file startup_stm32l151xd.s
 
-EXTI1_IRQHandler 0000001A
+HardFault_Handler 0000000A
 
-Symbol: EXTI1_IRQHandler
+Symbol: HardFault_Handler
    Definitions
-      At line 281 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 179 in file startup_stm32l151xd.s
    Uses
-      At line 104 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 225 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 82 in file startup_stm32l151xd.s
+      At line 180 in file startup_stm32l151xd.s
 
-EXTI2_IRQHandler 0000001A
+I2C1_ER_IRQHandler 0000001A
 
-Symbol: EXTI2_IRQHandler
+Symbol: I2C1_ER_IRQHandler
    Definitions
-      At line 282 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 305 in file startup_stm32l151xd.s
    Uses
-      At line 105 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 226 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 129 in file startup_stm32l151xd.s
+      At line 249 in file startup_stm32l151xd.s
 
-EXTI3_IRQHandler 0000001A
+I2C1_EV_IRQHandler 0000001A
 
-Symbol: EXTI3_IRQHandler
+Symbol: I2C1_EV_IRQHandler
    Definitions
-      At line 283 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 304 in file startup_stm32l151xd.s
    Uses
-      At line 106 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 227 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 128 in file startup_stm32l151xd.s
+      At line 248 in file startup_stm32l151xd.s
 
-EXTI4_IRQHandler 0000001A
+I2C2_ER_IRQHandler 0000001A
+
+Symbol: I2C2_ER_IRQHandler
+   Definitions
+      At line 307 in file startup_stm32l151xd.s
+   Uses
+      At line 131 in file startup_stm32l151xd.s
+      At line 251 in file startup_stm32l151xd.s
+
+I2C2_EV_IRQHandler 0000001A
+
+Symbol: I2C2_EV_IRQHandler
+   Definitions
+      At line 306 in file startup_stm32l151xd.s
+   Uses
+      At line 130 in file startup_stm32l151xd.s
+      At line 250 in file startup_stm32l151xd.s
+
 
 
 
 ARM Macro Assembler    Page 6 Alphabetic symbol ordering
 Relocatable symbols
 
+MemManage_Handler 0000000C
 
-Symbol: EXTI4_IRQHandler
+Symbol: MemManage_Handler
    Definitions
-      At line 284 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 184 in file startup_stm32l151xd.s
    Uses
-      At line 107 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 228 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 83 in file startup_stm32l151xd.s
+      At line 185 in file startup_stm32l151xd.s
 
-EXTI9_5_IRQHandler 0000001A
+NMI_Handler 00000008
 
-Symbol: EXTI9_5_IRQHandler
+Symbol: NMI_Handler
    Definitions
-      At line 297 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 174 in file startup_stm32l151xd.s
    Uses
-      At line 120 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 241 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 81 in file startup_stm32l151xd.s
+      At line 175 in file startup_stm32l151xd.s
 
-FLASH_IRQHandler 0000001A
+PVD_IRQHandler 0000001A
 
-Symbol: FLASH_IRQHandler
+Symbol: PVD_IRQHandler
    Definitions
-      At line 278 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 275 in file startup_stm32l151xd.s
    Uses
-      At line 101 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 222 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 98 in file startup_stm32l151xd.s
+      At line 219 in file startup_stm32l151xd.s
 
-HardFault_Handler 0000000A
+PendSV_Handler 00000016
 
-Symbol: HardFault_Handler
+Symbol: PendSV_Handler
    Definitions
-      At line 179 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 207 in file startup_stm32l151xd.s
    Uses
-      At line 82 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 180 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 93 in file startup_stm32l151xd.s
+      At line 208 in file startup_stm32l151xd.s
 
-I2C1_ER_IRQHandler 0000001A
+RCC_IRQHandler 0000001A
 
-Symbol: I2C1_ER_IRQHandler
+Symbol: RCC_IRQHandler
    Definitions
-      At line 305 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 279 in file startup_stm32l151xd.s
    Uses
-      At line 129 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 249 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 102 in file startup_stm32l151xd.s
+      At line 223 in file startup_stm32l151xd.s
 
+RTC_Alarm_IRQHandler 0000001A
+
+Symbol: RTC_Alarm_IRQHandler
+   Definitions
+      At line 314 in file startup_stm32l151xd.s
+   Uses
+      At line 138 in file startup_stm32l151xd.s
+      At line 258 in file startup_stm32l151xd.s
+
+RTC_WKUP_IRQHandler 0000001A
+
+Symbol: RTC_WKUP_IRQHandler
+   Definitions
+      At line 277 in file startup_stm32l151xd.s
 
 
 
 ARM Macro Assembler    Page 7 Alphabetic symbol ordering
 Relocatable symbols
 
-I2C1_EV_IRQHandler 0000001A
-
-Symbol: I2C1_EV_IRQHandler
-   Definitions
-      At line 304 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
    Uses
-      At line 128 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 248 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 100 in file startup_stm32l151xd.s
+      At line 221 in file startup_stm32l151xd.s
 
-I2C2_ER_IRQHandler 0000001A
+Reset_Handler 00000000
 
-Symbol: I2C2_ER_IRQHandler
+Symbol: Reset_Handler
    Definitions
-      At line 307 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 162 in file startup_stm32l151xd.s
    Uses
-      At line 131 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 251 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 80 in file startup_stm32l151xd.s
+      At line 163 in file startup_stm32l151xd.s
 
-I2C2_EV_IRQHandler 0000001A
+SDIO_IRQHandler 0000001A
 
-Symbol: I2C2_EV_IRQHandler
+Symbol: SDIO_IRQHandler
    Definitions
-      At line 306 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 318 in file startup_stm32l151xd.s
    Uses
-      At line 130 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 250 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 142 in file startup_stm32l151xd.s
+      At line 262 in file startup_stm32l151xd.s
 
-MemManage_Handler 0000000C
+SPI1_IRQHandler 0000001A
 
-Symbol: MemManage_Handler
+Symbol: SPI1_IRQHandler
    Definitions
-      At line 184 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 308 in file startup_stm32l151xd.s
    Uses
-      At line 83 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 185 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 132 in file startup_stm32l151xd.s
+      At line 252 in file startup_stm32l151xd.s
 
-NMI_Handler 00000008
+SPI2_IRQHandler 0000001A
 
-Symbol: NMI_Handler
+Symbol: SPI2_IRQHandler
    Definitions
-      At line 174 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 309 in file startup_stm32l151xd.s
    Uses
-      At line 81 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 175 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 133 in file startup_stm32l151xd.s
+      At line 253 in file startup_stm32l151xd.s
+
+SPI3_IRQHandler 0000001A
+
+Symbol: SPI3_IRQHandler
+   Definitions
+      At line 320 in file startup_stm32l151xd.s
+   Uses
+      At line 144 in file startup_stm32l151xd.s
+      At line 264 in file startup_stm32l151xd.s
+
+SVC_Handler 00000012
+
+Symbol: SVC_Handler
+   Definitions
+      At line 198 in file startup_stm32l151xd.s
+   Uses
+      At line 90 in file startup_stm32l151xd.s
+      At line 199 in file startup_stm32l151xd.s
+
+SysTick_Handler 00000018
 
 
 
@@ -1163,476 +1130,241 @@ ARM Macro Assembler    Page 8 Alphabetic symbol ordering
 Relocatable symbols
 
 
-PVD_IRQHandler 0000001A
-
-Symbol: PVD_IRQHandler
+Symbol: SysTick_Handler
    Definitions
-      At line 275 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 211 in file startup_stm32l151xd.s
    Uses
-      At line 98 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 219 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 94 in file startup_stm32l151xd.s
+      At line 212 in file startup_stm32l151xd.s
 
-PendSV_Handler 00000016
+TAMPER_STAMP_IRQHandler 0000001A
 
-Symbol: PendSV_Handler
+Symbol: TAMPER_STAMP_IRQHandler
    Definitions
-      At line 207 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 276 in file startup_stm32l151xd.s
    Uses
-      At line 93 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 208 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 99 in file startup_stm32l151xd.s
+      At line 220 in file startup_stm32l151xd.s
 
-RCC_IRQHandler 0000001A
+TIM10_IRQHandler 0000001A
 
-Symbol: RCC_IRQHandler
+Symbol: TIM10_IRQHandler
    Definitions
-      At line 279 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 299 in file startup_stm32l151xd.s
    Uses
-      At line 102 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 223 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 123 in file startup_stm32l151xd.s
+      At line 243 in file startup_stm32l151xd.s
 
-RTC_Alarm_IRQHandler 0000001A
+TIM11_IRQHandler 0000001A
 
-Symbol: RTC_Alarm_IRQHandler
+Symbol: TIM11_IRQHandler
    Definitions
-      At line 314 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 300 in file startup_stm32l151xd.s
    Uses
-      At line 138 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 258 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 124 in file startup_stm32l151xd.s
+      At line 244 in file startup_stm32l151xd.s
 
-RTC_WKUP_IRQHandler 0000001A
+TIM2_IRQHandler 0000001A
 
-Symbol: RTC_WKUP_IRQHandler
+Symbol: TIM2_IRQHandler
    Definitions
-      At line 277 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 301 in file startup_stm32l151xd.s
    Uses
-      At line 100 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 221 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
+      At line 125 in file startup_stm32l151xd.s
+      At line 245 in file startup_stm32l151xd.s
+
+TIM3_IRQHandler 0000001A
+
+Symbol: TIM3_IRQHandler
+   Definitions
+      At line 302 in file startup_stm32l151xd.s
+   Uses
+      At line 126 in file startup_stm32l151xd.s
+      At line 246 in file startup_stm32l151xd.s
+
+TIM4_IRQHandler 0000001A
+
+Symbol: TIM4_IRQHandler
+   Definitions
+      At line 303 in file startup_stm32l151xd.s
+   Uses
 
 
 
 ARM Macro Assembler    Page 9 Alphabetic symbol ordering
 Relocatable symbols
 
-/arm/startup_stm32l151xd.s
+      At line 127 in file startup_stm32l151xd.s
+      At line 247 in file startup_stm32l151xd.s
 
-Reset_Handler 00000000
+TIM5_IRQHandler 0000001A
 
-Symbol: Reset_Handler
+Symbol: TIM5_IRQHandler
    Definitions
-      At line 162 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 319 in file startup_stm32l151xd.s
    Uses
-      At line 80 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 163 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 143 in file startup_stm32l151xd.s
+      At line 263 in file startup_stm32l151xd.s
 
-SDIO_IRQHandler 0000001A
+TIM6_IRQHandler 0000001A
 
-Symbol: SDIO_IRQHandler
+Symbol: TIM6_IRQHandler
    Definitions
-      At line 318 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 316 in file startup_stm32l151xd.s
    Uses
-      At line 142 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 262 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 140 in file startup_stm32l151xd.s
+      At line 260 in file startup_stm32l151xd.s
 
-SPI1_IRQHandler 0000001A
+TIM7_IRQHandler 0000001A
 
-Symbol: SPI1_IRQHandler
+Symbol: TIM7_IRQHandler
    Definitions
-      At line 308 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 317 in file startup_stm32l151xd.s
    Uses
-      At line 132 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 252 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 141 in file startup_stm32l151xd.s
+      At line 261 in file startup_stm32l151xd.s
 
-SPI2_IRQHandler 0000001A
+TIM9_IRQHandler 0000001A
 
-Symbol: SPI2_IRQHandler
+Symbol: TIM9_IRQHandler
    Definitions
-      At line 309 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 298 in file startup_stm32l151xd.s
    Uses
-      At line 133 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 253 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 122 in file startup_stm32l151xd.s
+      At line 242 in file startup_stm32l151xd.s
 
-SPI3_IRQHandler 0000001A
+UART4_IRQHandler 0000001A
 
-Symbol: SPI3_IRQHandler
+Symbol: UART4_IRQHandler
    Definitions
-      At line 320 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 321 in file startup_stm32l151xd.s
    Uses
-      At line 144 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 145 in file startup_stm32l151xd.s
+      At line 265 in file startup_stm32l151xd.s
+
+UART5_IRQHandler 0000001A
+
+Symbol: UART5_IRQHandler
+   Definitions
+      At line 322 in file startup_stm32l151xd.s
+   Uses
+      At line 146 in file startup_stm32l151xd.s
+      At line 266 in file startup_stm32l151xd.s
+
+USART1_IRQHandler 0000001A
+
 
 
 
 ARM Macro Assembler    Page 10 Alphabetic symbol ordering
 Relocatable symbols
 
-      At line 264 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-SVC_Handler 00000012
-
-Symbol: SVC_Handler
+Symbol: USART1_IRQHandler
    Definitions
-      At line 198 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 310 in file startup_stm32l151xd.s
    Uses
-      At line 90 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 199 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 134 in file startup_stm32l151xd.s
+      At line 254 in file startup_stm32l151xd.s
 
-SysTick_Handler 00000018
+USART2_IRQHandler 0000001A
 
-Symbol: SysTick_Handler
+Symbol: USART2_IRQHandler
    Definitions
-      At line 211 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 311 in file startup_stm32l151xd.s
    Uses
-      At line 94 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 212 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 135 in file startup_stm32l151xd.s
+      At line 255 in file startup_stm32l151xd.s
 
-TAMPER_STAMP_IRQHandler 0000001A
+USART3_IRQHandler 0000001A
 
-Symbol: TAMPER_STAMP_IRQHandler
+Symbol: USART3_IRQHandler
    Definitions
-      At line 276 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 312 in file startup_stm32l151xd.s
    Uses
-      At line 99 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 220 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 136 in file startup_stm32l151xd.s
+      At line 256 in file startup_stm32l151xd.s
 
-TIM10_IRQHandler 0000001A
+USB_FS_WKUP_IRQHandler 0000001A
 
-Symbol: TIM10_IRQHandler
+Symbol: USB_FS_WKUP_IRQHandler
    Definitions
-      At line 299 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 315 in file startup_stm32l151xd.s
    Uses
-      At line 123 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 243 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 139 in file startup_stm32l151xd.s
+      At line 259 in file startup_stm32l151xd.s
 
-TIM11_IRQHandler 0000001A
+USB_HP_IRQHandler 0000001A
 
-Symbol: TIM11_IRQHandler
+Symbol: USB_HP_IRQHandler
    Definitions
-      At line 300 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 293 in file startup_stm32l151xd.s
    Uses
-      At line 124 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
+      At line 116 in file startup_stm32l151xd.s
+      At line 237 in file startup_stm32l151xd.s
+
+USB_LP_IRQHandler 0000001A
+
+Symbol: USB_LP_IRQHandler
+   Definitions
+      At line 294 in file startup_stm32l151xd.s
+   Uses
+      At line 117 in file startup_stm32l151xd.s
+      At line 238 in file startup_stm32l151xd.s
+
+UsageFault_Handler 00000010
+
+Symbol: UsageFault_Handler
+   Definitions
+      At line 194 in file startup_stm32l151xd.s
+   Uses
+      At line 85 in file startup_stm32l151xd.s
 
 
 
 ARM Macro Assembler    Page 11 Alphabetic symbol ordering
 Relocatable symbols
 
-/arm/startup_stm32l151xd.s
-      At line 244 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-TIM2_IRQHandler 0000001A
-
-Symbol: TIM2_IRQHandler
-   Definitions
-      At line 301 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 125 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 245 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-TIM3_IRQHandler 0000001A
-
-Symbol: TIM3_IRQHandler
-   Definitions
-      At line 302 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 126 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 246 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-TIM4_IRQHandler 0000001A
-
-Symbol: TIM4_IRQHandler
-   Definitions
-      At line 303 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 127 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 247 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-TIM5_IRQHandler 0000001A
-
-Symbol: TIM5_IRQHandler
-   Definitions
-      At line 319 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 143 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 263 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-TIM6_IRQHandler 0000001A
-
-Symbol: TIM6_IRQHandler
-   Definitions
-      At line 316 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-
-
-
-ARM Macro Assembler    Page 12 Alphabetic symbol ordering
-Relocatable symbols
-
-      At line 140 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 260 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-TIM7_IRQHandler 0000001A
-
-Symbol: TIM7_IRQHandler
-   Definitions
-      At line 317 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 141 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 261 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-TIM9_IRQHandler 0000001A
-
-Symbol: TIM9_IRQHandler
-   Definitions
-      At line 298 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 122 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 242 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-UART4_IRQHandler 0000001A
-
-Symbol: UART4_IRQHandler
-   Definitions
-      At line 321 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 145 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 265 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-UART5_IRQHandler 0000001A
-
-Symbol: UART5_IRQHandler
-   Definitions
-      At line 322 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 146 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 266 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-USART1_IRQHandler 0000001A
-
-Symbol: USART1_IRQHandler
-   Definitions
-      At line 310 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-
-
-ARM Macro Assembler    Page 13 Alphabetic symbol ordering
-Relocatable symbols
-
-   Uses
-      At line 134 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 254 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-USART2_IRQHandler 0000001A
-
-Symbol: USART2_IRQHandler
-   Definitions
-      At line 311 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 135 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 255 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-USART3_IRQHandler 0000001A
-
-Symbol: USART3_IRQHandler
-   Definitions
-      At line 312 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 136 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 256 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-USB_FS_WKUP_IRQHandler 0000001A
-
-Symbol: USB_FS_WKUP_IRQHandler
-   Definitions
-      At line 315 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 139 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 259 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-USB_HP_IRQHandler 0000001A
-
-Symbol: USB_HP_IRQHandler
-   Definitions
-      At line 293 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 116 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 237 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-USB_LP_IRQHandler 0000001A
-
-Symbol: USB_LP_IRQHandler
-   Definitions
-      At line 294 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-
-
-
-ARM Macro Assembler    Page 14 Alphabetic symbol ordering
-Relocatable symbols
-
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 117 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-      At line 238 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
-UsageFault_Handler 00000010
-
-Symbol: UsageFault_Handler
-   Definitions
-      At line 194 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 85 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 195 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 195 in file startup_stm32l151xd.s
 
 WWDG_IRQHandler 0000001A
 
 Symbol: WWDG_IRQHandler
    Definitions
-      At line 274 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 274 in file startup_stm32l151xd.s
    Uses
-      At line 97 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 218 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 97 in file startup_stm32l151xd.s
+      At line 218 in file startup_stm32l151xd.s
 
-__user_initial_stackheap 0000001C
-
-Symbol: __user_initial_stackheap
-   Definitions
-      At line 350 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      At line 348 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-Comment: __user_initial_stackheap used once
-68 symbols
+67 symbols
 
 
 
 ARM Macro Assembler    Page 1 Alphabetic symbol ordering
 Absolute symbols
 
-Heap_Size 00000200
+Heap_Size 00000800
 
 Symbol: Heap_Size
    Definitions
-      At line 62 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
+      At line 62 in file startup_stm32l151xd.s
    Uses
-      At line 66 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 354 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
+      At line 66 in file startup_stm32l151xd.s
+Comment: Heap_Size used once
 Stack_Size 00000400
 
 Symbol: Stack_Size
    Definitions
-      At line 51 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
+      At line 51 in file startup_stm32l151xd.s
    Uses
-      At line 54 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
-      At line 353 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-
+      At line 54 in file startup_stm32l151xd.s
+Comment: Stack_Size used once
 __Vectors_Size 00000124
 
 Symbol: __Vectors_Size
    Definitions
-      At line 157 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 157 in file startup_stm32l151xd.s
    Uses
-      At line 77 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates/
-arm/startup_stm32l151xd.s
+      At line 77 in file startup_stm32l151xd.s
 Comment: __Vectors_Size used once
 3 symbols
 
@@ -1645,30 +1377,17 @@ SystemInit 00000000
 
 Symbol: SystemInit
    Definitions
-      At line 165 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 165 in file startup_stm32l151xd.s
    Uses
-      At line 166 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 166 in file startup_stm32l151xd.s
 Comment: SystemInit used once
 __main 00000000
 
 Symbol: __main
    Definitions
-      At line 164 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 164 in file startup_stm32l151xd.s
    Uses
-      At line 168 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
+      At line 168 in file startup_stm32l151xd.s
 Comment: __main used once
-__use_two_region_memory 00000000
-
-Symbol: __use_two_region_memory
-   Definitions
-      At line 347 in file ../Drivers/CMSIS/Device/ST/STM32L1xx/Source/Templates
-/arm/startup_stm32l151xd.s
-   Uses
-      None
-Comment: __use_two_region_memory unused
-3 symbols
-421 symbols in table
+2 symbols
+418 symbols in table
