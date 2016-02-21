@@ -35,6 +35,8 @@
 #include "fatfs.h"
 
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
+
 
 // Set uC DC-DC module power ---------------------------------------------------------------------------------
 #define UC_1_8V HAL_GPIO_WritePin(PWR_TO2_8AND2_9V_GPIO_Port, PWR_TO2_8AND2_9V_Pin, GPIO_PIN_RESET); 	HAL_GPIO_WritePin(PWR_TO_2_8V_GPIO_Port, PWR_TO_2_8V_Pin, GPIO_PIN_RESET)
@@ -97,8 +99,6 @@ char SDPath[4]; /* SD card logical drive path */
 
 const char wtext[] = "Hello World!";
 
-
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -117,6 +117,16 @@ static void MX_USART2_UART_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+
+int fputc(int ch, FILE *f)
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART1 and Loop until the end of transmission */
+  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF);
+
+  return ch;
+}
+
 
 /* USER CODE END 0 */
 
@@ -144,7 +154,10 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
  // MX_ADC_Init();
-
+ // MX_SPI1_Init();
+ // MX_SPI2_Init();
+  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
 
   /* USER CODE BEGIN 2 */
 	
@@ -167,19 +180,20 @@ int main(void)
 	// D/C 1.8..2.9V ok
 	
 	// init gpio before!
-	UC_1_8V;			//minimal power
-	ENABLE_2_5V;	//DC-DC enable
+	UC_2_8V;			//minimal power
+	
+	
+goto skp;
+	
+	//ENABLE_2_5V;	//DC-DC enable
 	SD_PWR_ON;		//Power to SD card
 	//INIT SD and CARD after because no power to sd
 	
 	HAL_Delay(50);
-    MX_SDIO_SD_Init();
- // MX_SPI1_Init();
- // MX_SPI2_Init();
-//  MX_USART1_UART_Init();
-//  MX_USART2_UART_Init();
+  MX_SDIO_SD_Init();
+
   MX_FATFS_Init();
-	
+
 /*##-1- FatFS: Link the SD disk I/O driver ##########*/
  
  if(FATFS_LinkDriver(&SD_Driver, SDPath) == 0){
@@ -250,11 +264,15 @@ int main(void)
  }
  /*##-10- Unlink the micro SD disk I/O driver #########*/
  FATFS_UnLinkDriver(SD_Path);
-	
+
  IND4_ON;
-
+ 
+ skp:
 	while (1){
-
+			HAL_Delay(500);
+			printf("Main\r\n");
+			//HAL_UART_Transmit_IT(&huart1, "A", 1);
+		
 //		if (IS_SENS_CLAMP_A_ON) IND3_ON; else IND3_OFF;
 //		if (IS_SENS_CLAMP_B_ON)	IND2_ON; else IND2_OFF;
 //		if (IS_SENS_OPEN_ON) 		IND1_ON; else IND1_OFF;
@@ -422,7 +440,6 @@ void MX_USART1_UART_Init(void)
 /* USART2 init function */
 void MX_USART2_UART_Init(void)
 {
-
   huart2.Instance = USART2;
   huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
