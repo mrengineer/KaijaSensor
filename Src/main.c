@@ -32,6 +32,7 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l1xx_hal.h"
+#include "stm32l1xx_hal_spi.h"
 #include "fatfs.h"
 
 /* USER CODE BEGIN Includes */
@@ -99,6 +100,19 @@ char SDPath[4]; /* SD card logical drive path */
 
 const char wtext[] = "Hello World!";
 
+/* Size of buffer */
+#define BUFFERSIZE                       (COUNTOF(aTxBuffer) - 1)
+
+/* Exported macro ------------------------------------------------------------*/
+#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+/* Exported functions ------------------------------------------------------- */
+
+
+uint8_t aTxBuffer[] = "****SPI - Two Boards communication based on Polling **** SPI Message ******** SPI Message ******** SPI Message ****";
+
+/* Buffer used for reception */
+uint8_t aRxBuffer[BUFFERSIZE];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -113,13 +127,34 @@ static void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-#ifdef __GNUC__
-/* With GCC/RAISONANCE, small printf (option LD Linker->Libraries->Small printf
-   set to 'Yes') calls __io_putchar() */
-#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif /* __GNUC__ */
+
+/*int fputc(int ch, FILE *f){
+  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF);
+
+  return ch;
+}*/
+
+// FOR DEBUG send to  KEIL
+#define ITM_Port8(n)    (*((volatile unsigned char *)(0xE0000000+4*n)))
+#define ITM_Port16(n)   (*((volatile unsigned short*)(0xE0000000+4*n)))
+#define ITM_Port32(n)   (*((volatile unsigned long *)(0xE0000000+4*n)))
+#define DEMCR           (*((volatile unsigned long *)(0xE000EDFC)))
+#define TRCENA          0x01000000
+
+
+struct __FILE { int handle; /* Add whatever you need here */ };
+FILE __stdout;
+FILE __stdin;
+
+int fputc(int ch, FILE *f) {
+   if (DEMCR & TRCENA) {
+
+while (ITM_Port32(0) == 0);
+    ITM_Port8(0) = ch;
+  }
+  return(ch);
+}	
+
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -130,6 +165,8 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+	unsigned char r;	//ACC WHO_AM_I responce 
+	
 	
 	FRESULT res; /* FatFs function common result code */
 	uint32_t byteswritten, bytesread; /* File write/read counts */
@@ -137,6 +174,8 @@ int main(void)
 	
 	//	HALL_SENS_PWR_ON;
 	//	CLAMP_SENS_PWR_ON;
+	
+	//SPI1 is for ACC 
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -150,40 +189,15 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
  // MX_ADC_Init();
- // MX_SPI1_Init();
+  MX_SPI1_Init();					
  // MX_SPI2_Init();
- // MX_USART1_UART_Init();
+  MX_USART1_UART_Init();	//
   MX_USART2_UART_Init();
 
   /* USER CODE BEGIN 2 */
 	
+	//ACC ---------------------------------------------------------------------
 	
-	/*##-1- Configure the UART peripheral ######################################*/
-  /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
-  /* UART configured as follows:
-      - Word Length = 8 Bits (7 data bit + 1 parity bit)
-      - Stop Bit    = One Stop bit
-      - Parity      = ODD parity
-      - BaudRate    = 9600 baud
-      - Hardware flow control disabled (RTS and CTS signals) */
-  huart1.Instance        = USART1;
-
-  huart1.Init.BaudRate   	= 9600;
-  huart1.Init.WordLength	= UART_WORDLENGTH_8B;
-  huart1.Init.StopBits   	= UART_STOPBITS_1;
-  huart1.Init.Parity     	= UART_PARITY_ODD;
-  huart1.Init.HwFlowCtl 	= UART_HWCONTROL_NONE;
-  huart1.Init.Mode 				= UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl 	= UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-
-  if (HAL_UART_Init(&huart1) != HAL_OK)
-  {
-		while (1) {}
-    /* Initialization Error */
-    //Error_Handler();
-  }
-
 	
 	
 	//HALL_SENS_PWR_ON;
@@ -292,10 +306,42 @@ goto skp;
  IND4_ON;
  
  skp:
+ 
+
+ 
 	while (1){
-			HAL_Delay(500);
-			printf("Main\r\n");
-			//HAL_UART_Transmit_IT(&huart1, "A", 1);
+			HAL_Delay(50);
+			//LIS3DH_GetWHO_AM_I(&r);
+		//printf("Main: %i\r\n", r);
+
+		IND4_OFF;
+		IND1_OFF;
+		IND2_OFF;
+		IND3_OFF;
+		
+		IND3_ON;
+		  switch(HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE, 5000))
+  {
+    case HAL_OK:
+      /* Communication is completed ___________________________________________ */
+      /* Compare the sent and received buffers */
+			IND4_ON;
+      break;
+
+    case HAL_TIMEOUT:
+      /* An Error Occur ______________________________________________________ */
+			IND1_ON;
+			break;			
+    case HAL_ERROR:
+      /* Call Timeout Handler */
+     // Error_Handler();
+			IND2_ON;
+      break;
+    default:
+			
+      break;
+  }
+		IND3_OFF;
 		
 //		if (IS_SENS_CLAMP_A_ON) IND3_ON; else IND3_OFF;
 //		if (IS_SENS_CLAMP_B_ON)	IND2_ON; else IND2_OFF;
@@ -406,9 +452,7 @@ void MX_SDIO_SD_Init(void)
 }
 
 /* SPI1 init function */
-void MX_SPI1_Init(void)
-{
-
+void MX_SPI1_Init(void) {
   hspi1.Instance = SPI1;
   hspi1.Init.Mode = SPI_MODE_MASTER;
   hspi1.Init.Direction = SPI_DIRECTION_2LINES;
@@ -416,11 +460,12 @@ void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_HARD_INPUT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLED;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLED;
-  hspi1.Init.CRCPolynomial = 10;
+  //hspi1.Init.CRCPolynomial = 10;
+	hspi1.Init.CRCPolynomial = 7;
   HAL_SPI_Init(&hspi1);
 
 }
@@ -566,20 +611,6 @@ void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-/**
-  * @brief  Retargets the C library printf function to the USART.
-  * @param  None
-  * @retval None
-  */
-PUTCHAR_PROTOTYPE
-{
-  /* Place your implementation of fputc here */
-  /* e.g. write a character to the EVAL_COM1 and Loop until the end of transmission */
-  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF);
-
-  return ch;
-}
 
 /* USER CODE END 4 */
 
