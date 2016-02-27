@@ -32,7 +32,6 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l1xx_hal.h"
-#include "stm32l1xx_hal_spi.h"
 #include "fatfs.h"
 
 /* USER CODE BEGIN Includes */
@@ -166,7 +165,7 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 	unsigned char r;	//ACC WHO_AM_I responce 
-	
+	uint8_t b[2] = {0x00, 0xFF};
 	
 	FRESULT res; /* FatFs function common result code */
 	uint32_t byteswritten, bytesread; /* File write/read counts */
@@ -188,11 +187,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
- // MX_ADC_Init();
-  MX_SPI1_Init();					
- // MX_SPI2_Init();
-  MX_USART1_UART_Init();	//
+  MX_ADC_Init();
+
+  MX_SPI1_Init();
+  MX_SPI2_Init();
+  MX_USART1_UART_Init();
   MX_USART2_UART_Init();
+
 
   /* USER CODE BEGIN 2 */
 	
@@ -310,51 +311,9 @@ goto skp;
 
  
 	while (1){
-			HAL_Delay(50);
-			//LIS3DH_GetWHO_AM_I(&r);
-		//printf("Main: %i\r\n", r);
-
-		IND4_OFF;
-		IND1_OFF;
-		IND2_OFF;
-		IND3_OFF;
-		
-		IND3_ON;
-		  switch(HAL_SPI_TransmitReceive(&hspi1, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, BUFFERSIZE, 5000))
-  {
-    case HAL_OK:
-      /* Communication is completed ___________________________________________ */
-      /* Compare the sent and received buffers */
-			IND4_ON;
-      break;
-
-    case HAL_TIMEOUT:
-      /* An Error Occur ______________________________________________________ */
-			IND1_ON;
-			break;			
-    case HAL_ERROR:
-      /* Call Timeout Handler */
-     // Error_Handler();
-			IND2_ON;
-      break;
-    default:
-			
-      break;
-  }
-		IND3_OFF;
-		
-//		if (IS_SENS_CLAMP_A_ON) IND3_ON; else IND3_OFF;
-//		if (IS_SENS_CLAMP_B_ON)	IND2_ON; else IND2_OFF;
-//		if (IS_SENS_OPEN_ON) 		IND1_ON; else IND1_OFF;
-//		if (IS_SENS_TAKEOFF_ON) IND4_ON; else IND4_OFF;
-
-		//HAL_Delay(1000);
-		
-		//		printf("TEST\r\n");
-		
-			//HAL_GPIO_TogglePin(STATUS_GPIO_Port, STATUS_Pin);
-  /* USER CODE END WHILE */
-
+	/* USER CODE END WHILE */
+		HAL_SPI_Transmit(&hspi1, b, 2, 10);
+		HAL_Delay(1);
   /* USER CODE BEGIN 3 */
 
   }
@@ -447,25 +406,26 @@ void MX_SDIO_SD_Init(void)
   hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
   hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
   hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd.Init.ClockDiv = 100;
+  hsd.Init.ClockDiv = 20;
 
 }
 
 /* SPI1 init function */
-void MX_SPI1_Init(void) {
+void MX_SPI1_Init(void)
+{
+
   hspi1.Instance = SPI1;
   hspi1.Init.Mode = SPI_MODE_MASTER;
   hspi1.Init.Direction = SPI_DIRECTION_2LINES;
   hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_HARD_INPUT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+  hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLED;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLED;
-  //hspi1.Init.CRCPolynomial = 10;
-	hspi1.Init.CRCPolynomial = 7;
+  hspi1.Init.CRCPolynomial = 10;
   HAL_SPI_Init(&hspi1);
 
 }
@@ -480,8 +440,8 @@ void MX_SPI2_Init(void)
   hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_HARD_INPUT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi2.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLED;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLED;
@@ -509,6 +469,7 @@ void MX_USART1_UART_Init(void)
 /* USART2 init function */
 void MX_USART2_UART_Init(void)
 {
+
   huart2.Instance = USART2;
   huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
