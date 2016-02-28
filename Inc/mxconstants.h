@@ -54,6 +54,8 @@
 #define WIFI_RX_GPIO_Port GPIOA
 #define WIFI_TX_Pin GPIO_PIN_3
 #define WIFI_TX_GPIO_Port GPIOA
+#define ACC_CS_Pin GPIO_PIN_4
+#define ACC_CS_GPIO_Port GPIOA
 #define ACC_SCK_Pin GPIO_PIN_5
 #define ACC_SCK_GPIO_Port GPIOA
 #define ACC_MISO_Pin GPIO_PIN_6

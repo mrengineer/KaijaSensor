@@ -30,6 +30,15 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
+#define   SetBit(reg, bit)          reg |= (1<<bit)            
+#define   ClearBit(reg, bit)       reg &= (~(1<<bit))
+#define   InvBit(reg, bit)          reg ^= (1<<bit)
+#define   BitIsSet(reg, bit)       ((reg & (1<<bit)) != 0)
+#define   BitIsClear(reg, bit)    ((reg & (1<<bit)) == 0)
+
+//Acc
+#define ACC_ENABLE			HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_RESET)
+#define ACC_DISABLE			HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_SET)
 /* Private variables ---------------------------------------------------------*/
 extern SPI_HandleTypeDef hspi1;
 /* Private function prototypes -----------------------------------------------*/
@@ -42,31 +51,25 @@ extern SPI_HandleTypeDef hspi1;
 * Output		: Data REad
 * Return		: None
 *******************************************************************************/
-u8_t LIS3DH_ReadReg(u8_t Reg, u8_t* Data) {
-  
-	/*if(NumByteToRead > 0x01) {
-    ReadAddr |= (uint8_t)(READWRITE_CMD | MULTIPLEBYTE_CMD);
-  }	else {
-    ReadAddr |= (uint8_t)READWRITE_CMD;
-  }*/
+uint8_t LIS3DH_ReadReg(uint8_t Reg, uint8_t* Data) {
+	
+	uint8_t address = 0;
+	uint8_t data = 0;
+	
+  ACC_ENABLE;
+	
+	SetBit(Reg, 7);		//For reading register first bit of address must be set 1. Datasheet page 23 for LIS3DH. As it send as MSB => bit is 7
+	address = Reg; //0x8F; //10001111 - WHO_AM_I - READ
+	HAL_SPI_Transmit(&hspi1, &address, sizeof(data), 0x1000);
+		
+	address = 0x00; //00000000
+	HAL_SPI_Receive(&hspi1, &data, sizeof(data), 0x1000);
+	printf ("%i\r\n", data);
 
-  //LIS302DL_SendByte(Reg);  // Send the Address of the indexed register
-  
-  /* Receive the data that will be read from the device (MSB First) */
-  /*while(NumByteToRead > 0x00)
-  {
-    // Send dummy byte (0x00) to generate the SPI clock to LIS302DL (Slave device) 
-    *pBuffer = LIS302DL_SendByte(DUMMY_BYTE);
-    NumByteToRead--;
-    pBuffer++;
-  }*/
-	
-	 u8_t RxData;
-	
-	HAL_SPI_TransmitReceive(&hspi1, &Reg, &RxData, 1, 0xFFFF);
+ACC_DISABLE;
   //To be completed with either I2c or SPI reading function
   //i.e. *Data = SPI_Mems_Read_Reg( Reg );  
-  return RxData;
+  return data;
 }
 
 

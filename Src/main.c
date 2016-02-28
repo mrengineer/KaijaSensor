@@ -37,6 +37,9 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 
+//Acc
+#define ACC_ENABLE			HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_RESET)
+#define ACC_DISABLE			HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_SET)
 
 // Set uC DC-DC module power ---------------------------------------------------------------------------------
 #define UC_1_8V HAL_GPIO_WritePin(PWR_TO2_8AND2_9V_GPIO_Port, PWR_TO2_8AND2_9V_Pin, GPIO_PIN_RESET); 	HAL_GPIO_WritePin(PWR_TO_2_8V_GPIO_Port, PWR_TO_2_8V_Pin, GPIO_PIN_RESET)
@@ -107,10 +110,6 @@ const char wtext[] = "Hello World!";
 /* Exported functions ------------------------------------------------------- */
 
 
-uint8_t aTxBuffer[] = "****SPI - Two Boards communication based on Polling **** SPI Message ******** SPI Message ******** SPI Message ****";
-
-/* Buffer used for reception */
-uint8_t aRxBuffer[BUFFERSIZE];
 
 /* USER CODE END PV */
 
@@ -164,8 +163,9 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	unsigned char r;	//ACC WHO_AM_I responce 
-	uint8_t b[2] = {0x00, 0xFF};
+	
+//	uint8_t address = 0;
+//	uint8_t data = 0;
 	
 	FRESULT res; /* FatFs function common result code */
 	uint32_t byteswritten, bytesread; /* File write/read counts */
@@ -188,12 +188,12 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_ADC_Init();
-
+  //MX_SDIO_SD_Init();
   MX_SPI1_Init();
   MX_SPI2_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
-
+  //MX_FATFS_Init();
 
   /* USER CODE BEGIN 2 */
 	
@@ -311,11 +311,19 @@ goto skp;
 
  
 	while (1){
-	/* USER CODE END WHILE */
-		HAL_SPI_Transmit(&hspi1, b, 2, 10);
-		HAL_Delay(1);
+		LIS3DH_GetWHO_AM_I(0);
+  /* USER CODE END WHILE */
+	/*ACC_ENABLE;
+	address = 0x8F; //10001111 - WHO_AM_I - READ
+	HAL_SPI_TransmitReceive(&hspi1, &address, &data, sizeof(data), 0x1000);
+	printf ("%i ", data);
+		
+	address = 0x00; //00000000
+	HAL_SPI_TransmitReceive(&hspi1, &address, &data, sizeof(data), 0x1000);
+	printf ("%i\r\n", data);
+	ACC_DISABLE;*/
+		
   /* USER CODE BEGIN 3 */
-
   }
   /* USER CODE END 3 */
 
@@ -420,7 +428,7 @@ void MX_SPI1_Init(void)
   hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
   hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLED;
@@ -505,8 +513,8 @@ void MX_GPIO_Init(void)
                           |WIFI_PWR_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, STATUS_Pin|HALL_CLAMP_PWR_Pin|RF_PWR_Pin|INDICATOR3_Pin 
-                          |SD_PWR_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, STATUS_Pin|ACC_CS_Pin|HALL_CLAMP_PWR_Pin|RF_PWR_Pin 
+                          |INDICATOR3_Pin|SD_PWR_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SHUNT_0_06_DISABLE_Pin|HALL_SENS_PWR_Pin|RF_CE_Pin|PWR_TO2_8AND2_9V_Pin 
@@ -521,10 +529,10 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : STATUS_Pin HALL_CLAMP_PWR_Pin RF_PWR_Pin INDICATOR3_Pin 
-                           SD_PWR_Pin */
-  GPIO_InitStruct.Pin = STATUS_Pin|HALL_CLAMP_PWR_Pin|RF_PWR_Pin|INDICATOR3_Pin 
-                          |SD_PWR_Pin;
+  /*Configure GPIO pins : STATUS_Pin ACC_CS_Pin HALL_CLAMP_PWR_Pin RF_PWR_Pin 
+                           INDICATOR3_Pin SD_PWR_Pin */
+  GPIO_InitStruct.Pin = STATUS_Pin|ACC_CS_Pin|HALL_CLAMP_PWR_Pin|RF_PWR_Pin 
+                          |INDICATOR3_Pin|SD_PWR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
