@@ -40,3 +40,4 @@ fw\main.o: ../Inc/bsp_driver_sd.h
 fw\main.o: ../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h
 fw\main.o: ../Middlewares/Third_Party/FatFs/src/diskio.h
 fw\main.o: ../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.h
+fw\main.o: ../Inc/lis3dh_driver.h

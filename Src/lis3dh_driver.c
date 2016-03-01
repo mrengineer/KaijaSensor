@@ -54,22 +54,22 @@ extern SPI_HandleTypeDef hspi1;
 uint8_t LIS3DH_ReadReg(uint8_t Reg, uint8_t* Data) {
 	
 	uint8_t address = 0;
-	uint8_t data = 0;
+
 	
   ACC_ENABLE;
 	
 	SetBit(Reg, 7);		//For reading register first bit of address must be set 1. Datasheet page 23 for LIS3DH. As it send as MSB => bit is 7
 	address = Reg; //0x8F; //10001111 - WHO_AM_I - READ
-	HAL_SPI_Transmit(&hspi1, &address, sizeof(data), 0x1000);
+	HAL_SPI_Transmit(&hspi1, &address, sizeof(address), 0x1000);
 		
-	address = 0x00; //00000000
-	HAL_SPI_Receive(&hspi1, &data, sizeof(data), 0x1000);
-	printf ("%i\r\n", data);
+	HAL_SPI_Receive(&hspi1, Data, sizeof(Data), 0x1000);
+	
+//	printf ("%i\r\n", *Data);
 
 ACC_DISABLE;
   //To be completed with either I2c or SPI reading function
   //i.e. *Data = SPI_Mems_Read_Reg( Reg );  
-  return data;
+  return *Data;
 }
 
 
@@ -83,6 +83,20 @@ ACC_DISABLE;
 *******************************************************************************/
 u8_t LIS3DH_WriteReg(u8_t WriteAddr, u8_t Data) {
 
+	uint8_t address = 0;
+	
+  ACC_ENABLE;
+	
+	ClearBit(WriteAddr, 7);		//For WRITING register first bit of address must be set 0. Datasheet page 24 for LIS3DH. As it send as MSB => bit is 7
+	ClearBit(WriteAddr, 6);		//MS bit. 0 for single data byte 1 for multiple bytes with increment. Datasheet page 24 for LIS3DH. As it send as MSB => bit is 6
+
+	address = WriteAddr; 
+	HAL_SPI_Transmit(&hspi1, &address, sizeof(address), 0x1000);	
+
+	HAL_SPI_Transmit(&hspi1, &Data, sizeof(Data), 0x1000);
+
+	ACC_DISABLE;
+	
   //To be completed with either I2c or SPI writing function
   //i.e. SPI_Mems_Write_Reg(WriteAddr, Data);  
   return 1;

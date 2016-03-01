@@ -33,6 +33,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l1xx_hal.h"
 #include "fatfs.h"
+#include "lis3dh_driver.h"
 
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
@@ -102,13 +103,14 @@ char SDPath[4]; /* SD card logical drive path */
 
 const char wtext[] = "Hello World!";
 
+uint8_t resp;
+
 /* Size of buffer */
 #define BUFFERSIZE                       (COUNTOF(aTxBuffer) - 1)
 
 /* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 /* Exported functions ------------------------------------------------------- */
-
 
 
 /* USER CODE END PV */
@@ -139,7 +141,6 @@ static void MX_USART2_UART_Init(void);
 #define DEMCR           (*((volatile unsigned long *)(0xE000EDFC)))
 #define TRCENA          0x01000000
 
-
 struct __FILE { int handle; /* Add whatever you need here */ };
 FILE __stdout;
 FILE __stdin;
@@ -163,9 +164,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	
-//	uint8_t address = 0;
-//	uint8_t data = 0;
+  AxesRaw_t data;
 	
 	FRESULT res; /* FatFs function common result code */
 	uint32_t byteswritten, bytesread; /* File write/read counts */
@@ -308,22 +307,24 @@ goto skp;
  
  skp:
  
-
+ printf("HELLO!\r\n");
+ printf("HELLO!\r\n");
  
+	LIS3DH_GetWHO_AM_I(&resp);
+
+	LIS3DH_SetODR(LIS3DH_ODR_100Hz);
+  LIS3DH_SetMode(LIS3DH_NORMAL);
+  LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);
+  LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE);
+  
 	while (1){
-		LIS3DH_GetWHO_AM_I(0);
-  /* USER CODE END WHILE */
-	/*ACC_ENABLE;
-	address = 0x8F; //10001111 - WHO_AM_I - READ
-	HAL_SPI_TransmitReceive(&hspi1, &address, &data, sizeof(data), 0x1000);
-	printf ("%i ", data);
-		
-	address = 0x00; //00000000
-	HAL_SPI_TransmitReceive(&hspi1, &address, &data, sizeof(data), 0x1000);
-	printf ("%i\r\n", data);
-	ACC_DISABLE;*/
-		
   /* USER CODE BEGIN 3 */
+		
+		if(LIS3DH_GetAccAxesRaw(&data)==1){
+			printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
+		}
+
+			 //LIS3DH_GetWHO_AM_I(&resp);
   }
   /* USER CODE END 3 */
 
