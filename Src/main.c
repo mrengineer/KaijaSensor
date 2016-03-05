@@ -33,10 +33,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l1xx_hal.h"
 #include "fatfs.h"
-#include "lis3dh_driver.h"
 
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "lis3dh_driver.h"
 
 //Acc
 #define ACC_ENABLE			HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_RESET)
@@ -110,8 +110,9 @@ uint8_t resp;
 
 /* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+	
 /* Exported functions ------------------------------------------------------- */
-
+extern void read_power_consumption (void);
 
 /* USER CODE END PV */
 
@@ -164,7 +165,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  AxesRaw_t data;
+//  AxesRaw_t data;
 	
 	FRESULT res; /* FatFs function common result code */
 	uint32_t byteswritten, bytesread; /* File write/read counts */
@@ -304,10 +305,9 @@ goto skp;
  FATFS_UnLinkDriver(SD_Path);
 
  IND4_ON;
- 
+
  skp:
  
- printf("HELLO!\r\n");
  printf("HELLO!\r\n");
  
 	LIS3DH_GetWHO_AM_I(&resp);
@@ -320,10 +320,10 @@ goto skp;
 	while (1){
   /* USER CODE BEGIN 3 */
 		
-		if(LIS3DH_GetAccAxesRaw(&data)==1){
-			printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
-		}
-
+		//if(LIS3DH_GetAccAxesRaw(&data)==1){
+		//	printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
+		//}
+	read_power_consumption();
 			 //LIS3DH_GetWHO_AM_I(&resp);
   }
   /* USER CODE END 3 */

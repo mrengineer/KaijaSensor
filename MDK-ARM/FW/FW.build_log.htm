@@ -27,7 +27,18 @@ Project File Date:  02/27/2016
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 (build 20)', folder: 'C:\Keil\ARM\ARMCC\Bin'
 Build target 'FW'
-"FW\FW.axf" - 0 Error(s), 0 Warning(s).
+compiling main.c...
+../Src/main.c(228): warning:  #111-D: statement is unreachable
+  	
+D_PWR_ON;		//Power to SD card
+../Src/main.c(288): warning:  #223-D: function "strcmp" declared implicitly
+  												 if((strcmp(rtext,wtext)!=0)|| (res != FR_OK)){
+../Src/main.c: 2 warnings, 0 errors
+linking...
+FW\FW.axf: Error: L6218E: Undefined symbol read_power_consumption (referred from main.o).
+Not enough information to list image symbols.
+Finished: 1 information, 0 warning and 1 error messages.
+"FW\FW.axf" - 1 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -45,7 +56,8 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:4.3.0
-Build Time Elapsed:  00:00:00
+Target not created.
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>
