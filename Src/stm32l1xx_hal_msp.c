@@ -211,7 +211,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
     /**SPI1 GPIO Configuration    
     PA5     ------> SPI1_SCK
     PA6     ------> SPI1_MISO
-    PA7     ------> SPI1_MOSI 
+    PA12     ------> SPI1_MOSI 
     */
     GPIO_InitStruct.Pin = ACC_SCK_Pin|ACC_MISO_Pin|ACC_MOSI_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -272,7 +272,7 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
     /**SPI1 GPIO Configuration    
     PA5     ------> SPI1_SCK
     PA6     ------> SPI1_MISO
-    PA7     ------> SPI1_MOSI 
+    PA12     ------> SPI1_MOSI 
     */
     HAL_GPIO_DeInit(GPIOA, ACC_SCK_Pin|ACC_MISO_Pin|ACC_MOSI_Pin);
 

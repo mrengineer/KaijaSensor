@@ -40,6 +40,8 @@
 
 #define ACC_INT2_Pin GPIO_PIN_13
 #define ACC_INT2_GPIO_Port GPIOC
+#define INDICATOR3_Pin GPIO_PIN_0
+#define INDICATOR3_GPIO_Port GPIOH
 #define nDISCHARGE_Pin GPIO_PIN_0
 #define nDISCHARGE_GPIO_Port GPIOC
 #define PWR_TO_2_8V_Pin GPIO_PIN_2
@@ -60,8 +62,6 @@
 #define ACC_SCK_GPIO_Port GPIOA
 #define ACC_MISO_Pin GPIO_PIN_6
 #define ACC_MISO_GPIO_Port GPIOA
-#define ACC_MOSI_Pin GPIO_PIN_7
-#define ACC_MOSI_GPIO_Port GPIOA
 #define SENS_CLAMP_A_Pin GPIO_PIN_4
 #define SENS_CLAMP_A_GPIO_Port GPIOC
 #define SENS_TAKEOFF_Pin GPIO_PIN_5
@@ -96,8 +96,8 @@
 #define BLE_TX_GPIO_Port GPIOA
 #define RF_PWR_Pin GPIO_PIN_11
 #define RF_PWR_GPIO_Port GPIOA
-#define INDICATOR3_Pin GPIO_PIN_12
-#define INDICATOR3_GPIO_Port GPIOA
+#define ACC_MOSI_Pin GPIO_PIN_12
+#define ACC_MOSI_GPIO_Port GPIOA
 #define SD_PWR_Pin GPIO_PIN_15
 #define SD_PWR_GPIO_Port GPIOA
 #define SD_DAT2_Pin GPIO_PIN_10

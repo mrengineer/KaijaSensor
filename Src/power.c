@@ -28,19 +28,21 @@
 extern ADC_HandleTypeDef hadc;
 
 unsigned int adc_power;
-unsigned int shunt;
+unsigned char shunt;
+unsigned int shunt_devider;
 unsigned int gain = 100; //for MAX9938H, see datasheet
 
 void power_read(void){
 //	UC_2_8V;			    //max
-	adc_power = 2800; //2.8V adc power supply
-	shunt     = 150;  //150 Ohm
+	adc_power = 2900; //2.9V adc power supply
+	
+	shunt     = 68;  //150 Ohm
+	shunt_devider = 1000;
 	
 	uint32_t adcResult = 0;
-	unsigned int I = 0;
+	unsigned long I, V = 0;
 	
-	
-		DISCHARGE;
+		//DISCHARGE;
 		HAL_Delay(1);
 		CHARGE;
     HAL_Delay(10);
@@ -54,15 +56,14 @@ void power_read(void){
 	Uizm = I/R * 100 = gain*I/shunt
 	Uizm = adc_power * adcResult / ADC_RESOLUTION
 	*/
+
+	// Voltage on ADC pin
+	V = (adcResult * adc_power)/ADC_RESOLUTION;
 	
-	I = (adcResult * adc_power)/ADC_RESOLUTION;
+	// Current calculation
+	I = (V * shunt_devider) /(gain * shunt);	//mA
 	
-	//I = adc_power * shunt;
-	//I = I / gain;
-	//I = I * adcResult;
-	//I = I / ADC_RESOLUTION;
-	
-		printf("ADC: %i=>%i\r\n", adcResult, I);
+		printf("ADC: %i=>%imV => %imA\r\n", adcResult, V, I);
 
 	// init gpio before!
 

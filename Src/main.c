@@ -200,7 +200,15 @@ int main(void)
 	
 	//ACC ---------------------------------------------------------------------
 	
+	UC_2_9V;
 	
+	IND1_ON;
+	IND2_ON;
+	IND3_ON;
+	IND4_ON;
+	
+	while (1){
+	}
 	
 	//HALL_SENS_PWR_ON;
 	//CLAMP_SENS_PWR_OFF;
@@ -208,117 +216,10 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	  /* USER CODE BEGIN 2 */
-	//HALL_SENS_PWR_ON;
-	//CLAMP_SENS_PWR_ON;
-  /* USER CODE END 2 */
-	
-	// UC power change - fail
-	// SENS on-of-sensing - OK @ 2.9V
-	// LEDS ok @ 2.9V
-	// power DC/DC domain 2.5V OK @ uC at 2.9V
-	// D/C 1.8..2.9V ok
-	
-	// init gpio before!
-	UC_2_8V;			//minimal power
-	
-	
-goto skp;
-	
-	//ENABLE_2_5V;	//DC-DC enable
-	SD_PWR_ON;		//Power to SD card
-	//INIT SD and CARD after because no power to sd
-	
-	HAL_Delay(50);
-  MX_SDIO_SD_Init();
+  while (1)
+  {
+  /* USER CODE END WHILE */
 
-  MX_FATFS_Init();
-
-/*##-1- FatFS: Link the SD disk I/O driver ##########*/
- 
- if(FATFS_LinkDriver(&SD_Driver, SDPath) == 0){
-		/* success: set the orange LED on */
-		 //HAL_GPIO_WritePin(GPIOG, GPIO_PIN_7, GPIO_PIN_RESET);
-		/*##-2- Register the file system object to the FatFs module 
-	 
-		NB! mout right now!
-	 ###*/
-		res = f_mount(&SDFatFs, (TCHAR const*)SD_Path, 1) ;
-	 
-		 if(res != FR_OK){
-				 /* FatFs Initialization Error : set the red LED on */
-				 IND1_ON;
-				 while(1);
-		 } else {
-				/*##-3- Create a FAT file system (format) on the logical drive#*/
-				 /* WARNING: Formatting the uSD card will delete all content on the device */
-					res = f_mkfs((TCHAR const*)SD_Path, 0, 0);
-					if(res != FR_OK){
-						 /* FatFs Format Error : set the red LED on */
-				//		 ORANGE_ON;
-						IND1_ON;
-						 while(1);
-					} else {
-						/*##-4- Create & Open a new text file object with write access#*/
-						 if(f_open(&MyFile, "Hello.txt", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK){
-								 /* 'Hello.txt' file Open for write Error : set the red LED on */
-								 IND2_ON;
-								 while(1);
-						 } else {
-								 /*##-5- Write data to the text file ####################*/
-								 res = f_write(&MyFile, wtext, sizeof(wtext), (void*)&byteswritten);
-									 
-								 if((byteswritten == 0) || (res != FR_OK)){
-										 /* 'Hello.txt' file Write or EOF Error : set the red LED on */
-										 IND3_ON;
-										 while(1);
-								 } else {
-									 
-										 /*##-6- Successful open/write : set the blue LED on */
-										// HAL_GPIO_WritePin(GPIOG, GPIO_PIN_12, GPIO_PIN_RESET);
-										 f_close(&MyFile);
-									 
-										 /*##-7- Open the text file object with read access #*/
-										 if(f_open(&MyFile, "Hello.txt", FA_READ) != FR_OK){
-												 /* 'Hello.txt' file Open for read Error : set the red LED on */
-												//HAL_GPIO_WritePin(GPIOG, GPIO_PIN_10, GPIO_PIN_RESET);
-												 while(1);
-										 } else {
-												 /*##-8- Read data from the text file #########*/
-												 res = f_read(&MyFile, rtext, sizeof(wtext), &bytesread);
-												 if((strcmp(rtext,wtext)!=0)|| (res != FR_OK)){
-													 /* 'Hello.txt' file Read or EOF Error : set the red LED on */
-													 //HAL_GPIO_WritePin(GPIOG, GPIO_PIN_10, GPIO_PIN_RESET);
-													 while(1);
-												 } else {
-													 /* Successful read : set the green LED On */
-													 //HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);
-													 /*##-9- Close the open text file ################*/
-													 f_close(&MyFile);
-												 }
-										 }
-								 }
-						 }
-				 }
-		 }
- }
- /*##-10- Unlink the micro SD disk I/O driver #########*/
- FATFS_UnLinkDriver(SD_Path);
-
- IND4_ON;
-
- skp:
- 
- printf("HELLO!\r\n");
- 
-	LIS3DH_GetWHO_AM_I(&resp);
-
-	LIS3DH_SetODR(LIS3DH_ODR_100Hz);
-  LIS3DH_SetMode(LIS3DH_NORMAL);
-  LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);
-  LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE);
-  
-	while (1){
   /* USER CODE BEGIN 3 */
 		
 		//if(LIS3DH_GetAccAxesRaw(&data)==1){
@@ -329,20 +230,20 @@ goto skp;
 	IND3_ON;
 	IND4_ON;
 	HAL_Delay(10);
-	SD_PWR_ON;
+
 	power_read();
 		
-	HAL_Delay(500);
+	HAL_Delay(3000);
 		
 	IND1_OFF;
 	IND2_OFF;
 	IND3_OFF;
 	IND4_OFF;
 	HAL_Delay(10);
-	SD_PWR_OFF;	
+	
 	power_read();
 		
-	HAL_Delay(500);
+	HAL_Delay(3000);
 			 //LIS3DH_GetWHO_AM_I(&resp);
   }
   /* USER CODE END 3 */
@@ -417,10 +318,11 @@ void MX_ADC_Init(void)
 
     /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
     */
-  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
+  sConfig.Channel = ADC_CHANNEL_8;
   sConfig.Rank = 1;
   sConfig.SamplingTime = ADC_SAMPLETIME_4CYCLES;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
 }
 
 /* SDIO init function */
@@ -523,9 +425,13 @@ void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __GPIOC_CLK_ENABLE();
+  __GPIOH_CLK_ENABLE();
   __GPIOA_CLK_ENABLE();
   __GPIOB_CLK_ENABLE();
   __GPIOD_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(INDICATOR3_GPIO_Port, INDICATOR3_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, nDISCHARGE_Pin|PWR_TO_2_8V_Pin|ENABLE_2_5V_Pin|INDICATOR2_Pin 
@@ -533,11 +439,18 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, STATUS_Pin|ACC_CS_Pin|HALL_CLAMP_PWR_Pin|RF_PWR_Pin 
-                          |INDICATOR3_Pin|SD_PWR_Pin, GPIO_PIN_RESET);
+                          |SD_PWR_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SHUNT_0_06_DISABLE_Pin|HALL_SENS_PWR_Pin|RF_CE_Pin|PWR_TO2_8AND2_9V_Pin 
                           |INDICATOR1_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : INDICATOR3_Pin */
+  GPIO_InitStruct.Pin = INDICATOR3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
+  HAL_GPIO_Init(INDICATOR3_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : nDISCHARGE_Pin PWR_TO_2_8V_Pin ENABLE_2_5V_Pin INDICATOR2_Pin 
                            WIFI_PWR_Pin */
@@ -549,9 +462,9 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : STATUS_Pin ACC_CS_Pin HALL_CLAMP_PWR_Pin RF_PWR_Pin 
-                           INDICATOR3_Pin SD_PWR_Pin */
+                           SD_PWR_Pin */
   GPIO_InitStruct.Pin = STATUS_Pin|ACC_CS_Pin|HALL_CLAMP_PWR_Pin|RF_PWR_Pin 
-                          |INDICATOR3_Pin|SD_PWR_Pin;
+                          |SD_PWR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
