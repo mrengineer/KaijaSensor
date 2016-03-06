@@ -658,6 +658,16 @@
               <FileType>5</FileType>
               <FilePath>..\Inc\lis3dh_driver.h</FilePath>
             </File>
+            <File>
+              <FileName>power.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\power.h</FilePath>
+            </File>
+            <File>
+              <FileName>power.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\power.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

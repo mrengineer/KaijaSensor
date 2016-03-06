@@ -41,3 +41,5 @@ fw\main.o: ../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h
 fw\main.o: ../Middlewares/Third_Party/FatFs/src/diskio.h
 fw\main.o: ../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.h
 fw\main.o: ../Inc/lis3dh_driver.h
+fw\main.o: ../Inc/power.h
+fw\main.o: ../Inc/mxconstants.h

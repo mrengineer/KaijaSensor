@@ -149,98 +149,18 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>368</LineNumber>
+          <LineNumber>58</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134226270</Address>
+          <Address>134232340</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_sd.c</Filename>
+          <Filename>..\Src\power.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\FW\../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_sd.c\368</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>62</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134218392</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Src/bsp_driver_sd.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FW\../Src/bsp_driver_sd.c\62</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>2565</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134232502</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_sd.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FW\../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_sd.c\2565</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>2549</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134232454</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_sd.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FW\../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_sd.c\2549</Expression>
-        </Bp>
-        <Bp>
-          <Number>4</Number>
-          <Type>0</Type>
-          <LineNumber>2533</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134232400</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_sd.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FW\../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_sd.c\2533</Expression>
-        </Bp>
-        <Bp>
-          <Number>5</Number>
-          <Type>0</Type>
-          <LineNumber>364</LineNumber>
-          <EnabledFlag>0</EnabledFlag>
-          <Address>134226256</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_sd.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FW\../Drivers/STM32L1xx_HAL_Driver/Src/stm32l1xx_hal_sd.c\364</Expression>
+          <Expression>\\FW\../Src/power.c\58</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -253,6 +173,16 @@
           <count>1</count>
           <WinNumber>1</WinNumber>
           <ItemText>Data</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>adc_power,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>ADC_RESOLUTION</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
@@ -300,7 +230,7 @@
 
   <Group>
     <GroupName>Application/MDK-ARM</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -796,6 +726,32 @@
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
+    <File>
+      <GroupNumber>4</GroupNumber>
+      <FileNumber>37</FileNumber>
+      <FileType>5</FileType>
+      <tvExp>0</tvExp>
+      <Focus>0</Focus>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\Inc\power.h</PathWithFileName>
+      <FilenameWithoutPath>power.h</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>4</GroupNumber>
+      <FileNumber>38</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <Focus>0</Focus>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\Src\power.c</PathWithFileName>
+      <FilenameWithoutPath>power.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
   </Group>
 
   <Group>
@@ -806,7 +762,7 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>5</GroupNumber>
-      <FileNumber>37</FileNumber>
+      <FileNumber>39</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>

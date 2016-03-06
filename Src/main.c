@@ -37,6 +37,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include "lis3dh_driver.h"
+#include "power.h"
 
 //Acc
 #define ACC_ENABLE			HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_RESET)
@@ -112,7 +113,7 @@ uint8_t resp;
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 	
 /* Exported functions ------------------------------------------------------- */
-extern void read_power_consumption (void);
+//extern void read_power_consumption (void);
 
 /* USER CODE END PV */
 
@@ -323,7 +324,25 @@ goto skp;
 		//if(LIS3DH_GetAccAxesRaw(&data)==1){
 		//	printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
 		//}
-	read_power_consumption();
+	IND1_ON;
+	IND2_ON;
+	IND3_ON;
+	IND4_ON;
+	HAL_Delay(10);
+	SD_PWR_ON;
+	power_read();
+		
+	HAL_Delay(500);
+		
+	IND1_OFF;
+	IND2_OFF;
+	IND3_OFF;
+	IND4_OFF;
+	HAL_Delay(10);
+	SD_PWR_OFF;	
+	power_read();
+		
+	HAL_Delay(500);
 			 //LIS3DH_GetWHO_AM_I(&resp);
   }
   /* USER CODE END 3 */
@@ -402,7 +421,6 @@ void MX_ADC_Init(void)
   sConfig.Rank = 1;
   sConfig.SamplingTime = ADC_SAMPLETIME_4CYCLES;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
 }
 
 /* SDIO init function */
