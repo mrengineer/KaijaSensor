@@ -43,16 +43,6 @@
 #define ACC_ENABLE			HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_RESET)
 #define ACC_DISABLE			HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_SET)
 
-// Set uC DC-DC module power ---------------------------------------------------------------------------------
-#define UC_1_8V HAL_GPIO_WritePin(PWR_TO2_8AND2_9V_GPIO_Port, PWR_TO2_8AND2_9V_Pin, GPIO_PIN_RESET); 	HAL_GPIO_WritePin(PWR_TO_2_8V_GPIO_Port, PWR_TO_2_8V_Pin, GPIO_PIN_RESET)
-#define UC_1_9V HAL_GPIO_WritePin(PWR_TO2_8AND2_9V_GPIO_Port, PWR_TO2_8AND2_9V_Pin, GPIO_PIN_SET);	 	HAL_GPIO_WritePin(PWR_TO_2_8V_GPIO_Port, PWR_TO_2_8V_Pin, GPIO_PIN_RESET)
-#define UC_2_8V HAL_GPIO_WritePin(PWR_TO2_8AND2_9V_GPIO_Port, PWR_TO2_8AND2_9V_Pin, GPIO_PIN_RESET); 	HAL_GPIO_WritePin(PWR_TO_2_8V_GPIO_Port, PWR_TO_2_8V_Pin, GPIO_PIN_SET)
-#define UC_2_9V HAL_GPIO_WritePin(PWR_TO2_8AND2_9V_GPIO_Port, PWR_TO2_8AND2_9V_Pin, GPIO_PIN_SET); 		HAL_GPIO_WritePin(PWR_TO_2_8V_GPIO_Port, PWR_TO_2_8V_Pin, GPIO_PIN_SET)
-
-// Power DC-DC		--------------------------------------------------------------------------------------------
-#define ENABLE_2_5V					HAL_GPIO_WritePin(ENABLE_2_5V_GPIO_Port, ENABLE_2_5V_Pin, GPIO_PIN_SET)
-#define DISABLE_2_5V				HAL_GPIO_WritePin(ENABLE_2_5V_GPIO_Port, ENABLE_2_5V_Pin, GPIO_PIN_RESET)
-
 // Magnetic sensors		----------------------------------------------------------------------------------------
 //Power management
 #define CLAMP_SENS_PWR_ON		HAL_GPIO_WritePin(HALL_CLAMP_PWR_GPIO_Port, HALL_CLAMP_PWR_Pin, GPIO_PIN_SET)
@@ -198,9 +188,7 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 	
-	//ACC ---------------------------------------------------------------------
-	
-	
+	//HAL_DBGMCU_EnableDBGSleepMode(); //Allow debug while sleep. Remove it on release as it will increase POWER in SLEEP
 	
 	//HALL_SENS_PWR_ON;
 	//CLAMP_SENS_PWR_OFF;
@@ -220,7 +208,7 @@ int main(void)
 	// D/C 1.8..2.9V ok
 	
 	// init gpio before!
-	UC_2_8V;			//minimal power
+//	UC_2_8V;			//minimal power
 	
 	
 goto skp;
@@ -318,13 +306,14 @@ goto skp;
   LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);
   LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE);
   
+
 	while (1){
   /* USER CODE BEGIN 3 */
 		
 		//if(LIS3DH_GetAccAxesRaw(&data)==1){
 		//	printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
 		//}
-	IND1_ON;
+	/*IND1_ON;
 	IND2_ON;
 	IND3_ON;
 	IND4_ON;
@@ -342,8 +331,9 @@ goto skp;
 	SD_PWR_OFF;	
 	power_read();
 		
-	HAL_Delay(500);
-			 //LIS3DH_GetWHO_AM_I(&resp);
+	HAL_Delay(500);*/
+	//LIS3DH_GetWHO_AM_I(&resp);
+			lowest_power();
   }
   /* USER CODE END 3 */
 

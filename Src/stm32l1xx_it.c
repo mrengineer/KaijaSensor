@@ -36,6 +36,7 @@
 #include "stm32l1xx_it.h"
 
 /* USER CODE BEGIN 0 */
+#include "power.h"
 
 /* USER CODE END 0 */
 
@@ -57,12 +58,19 @@ extern UART_HandleTypeDef huart2;
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-
+		static unsigned int i;
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
+	
+	i++;
+	
+	if (i>250) {
+		HAL_GPIO_TogglePin(INDICATOR1_GPIO_Port, INDICATOR1_Pin);
+		i = 0;
+	}
+	
   /* USER CODE END SysTick_IRQn 1 */
 }
 

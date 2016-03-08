@@ -8,12 +8,13 @@
 
 /* Includes ------------------------------------------------------------------*/
 	#include "stm32l1xx_hal.h"
+	#include "stm32l1xx_hal_rcc.h"
 	#include "mxconstants.h"
 	#include "stm32l1xx_hal_adc.h"
 	#include "stm32l1xx_hal_adc_ex.h"
 
 /* Exported constants --------------------------------------------------------*/ 
-void power_read(void);
+void lowest_power(void);
 
 /* Exported functions --------------------------------------------------------*/   
    
