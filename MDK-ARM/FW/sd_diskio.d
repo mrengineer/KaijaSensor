@@ -33,6 +33,8 @@ fw\sd_diskio.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_flash_ex.h
 fw\sd_diskio.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_flash_ramfunc.h
 fw\sd_diskio.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_pwr.h
 fw\sd_diskio.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_pwr_ex.h
+fw\sd_diskio.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_rtc.h
+fw\sd_diskio.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_rtc_ex.h
 fw\sd_diskio.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_sd.h
 fw\sd_diskio.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_ll_sdmmc.h
 fw\sd_diskio.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_spi.h

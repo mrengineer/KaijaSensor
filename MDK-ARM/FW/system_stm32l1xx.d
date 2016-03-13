@@ -27,6 +27,8 @@ fw\system_stm32l1xx.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_flash_e
 fw\system_stm32l1xx.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_flash_ramfunc.h
 fw\system_stm32l1xx.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_pwr.h
 fw\system_stm32l1xx.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_pwr_ex.h
+fw\system_stm32l1xx.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_rtc.h
+fw\system_stm32l1xx.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_rtc_ex.h
 fw\system_stm32l1xx.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_sd.h
 fw\system_stm32l1xx.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_ll_sdmmc.h
 fw\system_stm32l1xx.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_spi.h

@@ -24,13 +24,15 @@
 #define DISCHARGE	HAL_GPIO_WritePin(nDISCHARGE_GPIO_Port, nDISCHARGE_Pin, GPIO_PIN_RESET);   //OPEN discharge transistor
 
 #define ADC_RESOLUTION 4096
+#define gain 100 								//for MAX9938H, see datasheet
+
 /* Private variables ---------------------------------------------------------*/
 extern ADC_HandleTypeDef hadc;
 
 unsigned int adc_power;
 unsigned char shunt;
 unsigned int shunt_devider;
-unsigned int gain = 100; //for MAX9938H, see datasheet
+
 
 void power_read(void){
 //	UC_2_8V;			    //max
@@ -82,22 +84,26 @@ Magnet sensors are off, checked on timer systick.
 Shunt: 150 OHm
 */
 void lowest_power (void){
-	//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
 	
 	    /* Disable all used wakeup sources: WKUP pin */
- //   HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
-	//	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN2);
+  HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
+	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN2);
     
     /* Clear all related wakeup flags */
     /* Clear PWR wake up Flag */
-    //__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+    __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
     
     /* Enable WKUP pin */
-  //  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
-  //  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN2);
+    HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
+    HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN2);
 	
-    /* Request to enter STANDBY mode */
-		printf("lowest_power\r\n");
-    HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI);
 	
+		/* Enable Ultra low power mode */
+		HAL_PWREx_EnableUltraLowPower();
+
+		/* Enable the fast wake up from Ultra low power mode */
+		HAL_PWREx_EnableFastWakeUp();
+		
+		HAL_SuspendTick();
+		HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 }

@@ -163,7 +163,7 @@
             <CpuDllArguments></CpuDllArguments>
             <PeripheralDll></PeripheralDll>
             <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile></InitializationFile>
+            <InitializationFile>.\STM32DBG.ini</InitializationFile>
             <Driver>STLink\ST-LINKIII-KEIL_SWO.dll</Driver>
           </TargetDlls>
         </DebugOption>
@@ -373,7 +373,7 @@
               <MiscControls>--C99</MiscControls>
               <Define>USE_HAL_DRIVER,STM32L151xD</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;  ../Drivers/STM32L1xx_HAL_Driver/Inc;  ../Drivers/STM32L1xx_HAL_Driver/Inc/Legacy;  ../Middlewares/Third_Party/FatFs/src/drivers;  ../Middlewares/Third_Party/FatFs/src;  ../Drivers/CMSIS/Include;  ../Drivers/CMSIS/Device/ST/STM32L1xx/Include</IncludePath>
+              <IncludePath>../Inc;      ../Drivers/STM32L1xx_HAL_Driver/Inc;      ../Drivers/STM32L1xx_HAL_Driver/Inc/Legacy;      ../Middlewares/Third_Party/FatFs/src/drivers;      ../Middlewares/Third_Party/FatFs/src;      ../Drivers/CMSIS/Include;      ../Drivers/CMSIS/Device/ST/STM32L1xx/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>

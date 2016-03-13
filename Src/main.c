@@ -77,6 +77,8 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc;
 
+RTC_HandleTypeDef hrtc;
+
 SD_HandleTypeDef hsd;
 HAL_SD_CardInfoTypedef SDCardInfo;
 
@@ -103,7 +105,7 @@ uint8_t resp;
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 	
 /* Exported functions ------------------------------------------------------- */
-//extern void read_power_consumption (void);
+
 
 /* USER CODE END PV */
 
@@ -116,6 +118,7 @@ static void MX_SPI1_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_RTC_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -156,7 +159,9 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-//  AxesRaw_t data;
+
+	
+  AxesRaw_t data;
 	
 	FRESULT res; /* FatFs function common result code */
 	uint32_t byteswritten, bytesread; /* File write/read counts */
@@ -165,7 +170,9 @@ int main(void)
 	//	HALL_SENS_PWR_ON;
 	//	CLAMP_SENS_PWR_ON;
 	
-	//SPI1 is for ACC 
+	//	1. SPI1 is for ACC 
+	
+	
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -178,38 +185,26 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_ADC_Init();
-  //MX_SDIO_SD_Init();
+ // MX_ADC_Init();
+ // MX_SDIO_SD_Init();
   MX_SPI1_Init();
-  MX_SPI2_Init();
-  MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
-  //MX_FATFS_Init();
+ // MX_SPI2_Init();
+ // MX_USART1_UART_Init();
+ // MX_USART2_UART_Init();
+ // MX_FATFS_Init();
+  MX_RTC_Init();
 
   /* USER CODE BEGIN 2 */
 	
-	//HAL_DBGMCU_EnableDBGSleepMode(); //Allow debug while sleep. Remove it on release as it will increase POWER in SLEEP
-	
+	HAL_DBGMCU_EnableDBGStopMode();
+
+
 	//HALL_SENS_PWR_ON;
 	//CLAMP_SENS_PWR_OFF;
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-	  /* USER CODE BEGIN 2 */
-	//HALL_SENS_PWR_ON;
-	//CLAMP_SENS_PWR_ON;
-  /* USER CODE END 2 */
 	
-	// UC power change - fail
-	// SENS on-of-sensing - OK @ 2.9V
-	// LEDS ok @ 2.9V
-	// power DC/DC domain 2.5V OK @ uC at 2.9V
-	// D/C 1.8..2.9V ok
 	
 	// init gpio before!
 //	UC_2_8V;			//minimal power
-	
 	
 goto skp;
 	
@@ -297,43 +292,62 @@ goto skp;
 
  skp:
  
- printf("HELLO!\r\n");
- 
-	LIS3DH_GetWHO_AM_I(&resp);
+	printf("FW start\r\n");
 
+	LIS3DH_GetWHO_AM_I(&resp);
+	printf("LIS3DH_GetWHO_AM_I=%i\r\n", resp);	
+
+ 
+HAL_Delay(1);
+ 
 	LIS3DH_SetODR(LIS3DH_ODR_100Hz);
   LIS3DH_SetMode(LIS3DH_NORMAL);
   LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);
   LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE);
   
+ // if (LIS3DH_SetInt1Threshold(2) == 1) printf("Threshold is set\r\n");
 
-	while (1){
+HAL_Delay(10);
+  //set Interrupt configuration 
+//	if (LIS3DH_SetIntConfiguration(	 
+//																	LIS3DH_INT1_ZHIE_ENABLE | LIS3DH_INT1_ZLIE_ENABLE |
+//																	LIS3DH_INT1_YHIE_ENABLE | LIS3DH_INT1_YLIE_ENABLE |
+//																	LIS3DH_INT1_XHIE_ENABLE | LIS3DH_INT1_XLIE_ENABLE) ==1) printf("INT 1 is set\r\n");
+ 
+//	HAL_Delay(10);
+	
+//	if (LIS3DH_SetIntMode(LIS3DH_INT_MODE_6D_POSITION) == 1) printf("INT mode is set\r\n");
+	
+LIS3DH_FIFOModeEnable(LIS3DH_FIFO_MODE);	//Enable store into FIFO
+LIS3DH_SetInt1Duration(64);   // len of irq pulse in n/odr
+LIS3DH_SetWaterMark(18); // watermark for irq generation from fifo 
+
+//Direct IRQ from watemark and overrun to 1st pin. 
+LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_DISABLE | 
+									LIS3DH_I1_INT2_ON_PIN_INT1_DISABLE | LIS3DH_I1_DRDY1_ON_INT1_DISABLE	| 
+									LIS3DH_I1_DRDY2_ON_INT1_DISABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
+
+
+//ENABLE ALL IRQs
+//LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | LIS3DH_I1_INT2_ON_PIN_INT1_ENABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE | LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
+//LIS3DH_SetInt2Pin(LIS3DH_CLICK_ON_PIN_INT2_DISABLE | LIS3DH_I2_INT1_ON_PIN_INT2_ENABLE | LIS3DH_I2_INT2_ON_PIN_INT2_ENABLE | LIS3DH_I2_BOOT_ON_INT2_ENABLE | LIS3DH_INT_ACTIVE_HIGH);
+	HAL_Delay(2000);
+	
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)  {
+  /* USER CODE END WHILE */
+
   /* USER CODE BEGIN 3 */
 		
-		//if(LIS3DH_GetAccAxesRaw(&data)==1){
-		//	printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
-		//}
-	/*IND1_ON;
-	IND2_ON;
-	IND3_ON;
-	IND4_ON;
-	HAL_Delay(10);
-	SD_PWR_ON;
-	power_read();
-		
-	HAL_Delay(500);
-		
-	IND1_OFF;
-	IND2_OFF;
-	IND3_OFF;
-	IND4_OFF;
-	HAL_Delay(10);
-	SD_PWR_OFF;	
-	power_read();
-		
-	HAL_Delay(500);*/
-	//LIS3DH_GetWHO_AM_I(&resp);
-			lowest_power();
+		if(LIS3DH_GetAccAxesRaw(&data)==1){
+			printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
+		}
+		HAL_Delay(500);
+
+		//	lowest_power();		//go to stop. Wakeup on RTC wakeup or 1st or 2d PIN wakeup
   }
   /* USER CODE END 3 */
 
@@ -346,12 +360,14 @@ void SystemClock_Config(void)
 
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
+  RCC_PeriphCLKInitTypeDef PeriphClkInit;
 
   __PWR_CLK_ENABLE();
 
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = 16;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -368,6 +384,10 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
 
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
+
   HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
@@ -377,9 +397,8 @@ void SystemClock_Config(void)
 }
 
 /* ADC init function */
-
-/* ADC init function */
-void MX_ADC_Init(void) {
+void MX_ADC_Init(void)
+{
 
   ADC_ChannelConfTypeDef sConfig;
 
@@ -408,10 +427,50 @@ void MX_ADC_Init(void) {
 
     /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
     */
-  sConfig.Channel = ADC_CHANNEL_8;
+  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
   sConfig.Rank = 1;
   sConfig.SamplingTime = ADC_SAMPLETIME_4CYCLES;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+}
+
+/* RTC init function */
+void MX_RTC_Init(void)
+{
+
+  RTC_TimeTypeDef sTime;
+  RTC_DateTypeDef sDate;
+
+    /**Initialize RTC and set the Time and Date 
+    */
+  hrtc.Instance = RTC;
+  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+  hrtc.Init.AsynchPrediv = 127;
+  hrtc.Init.SynchPrediv = 255;
+  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+  HAL_RTC_Init(&hrtc);
+
+  sTime.Hours = 0x0;
+  sTime.Minutes = 0x0;
+  sTime.Seconds = 0x0;
+  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+  HAL_RTC_SetTime(&hrtc, &sTime, FORMAT_BCD);
+
+  sDate.WeekDay = RTC_WEEKDAY_SUNDAY;
+  sDate.Month = RTC_MONTH_MARCH;
+  sDate.Date = 0x12;
+  sDate.Year = 0x16;
+
+  HAL_RTC_SetDate(&hrtc, &sDate, FORMAT_BCD);
+
+    /**Enable the WakeUp 
+    */
+	HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);	// IRQ from RTC will not operate without this line!
+//  HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 500, RTC_WAKEUPCLOCK_RTCCLK_DIV16);	
+ HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 1, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);   //1Hz IRQ
 
 }
 

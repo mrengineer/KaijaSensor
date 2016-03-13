@@ -142,9 +142,9 @@ int main(void)
         SetEPTxValid(ENDP1);
   }
  //set Interrupt configuration (all enabled)
- response = LIS3DH_SetIntConfiguration(LIS3DH_INT1_ZHIE_ENABLE | LIS3DH_INT1_ZLIE_ENABLE |
-									   LIS3DH_INT1_YHIE_ENABLE | LIS3DH_INT1_YLIE_ENABLE |
-									   LIS3DH_INT1_XHIE_ENABLE | LIS3DH_INT1_XLIE_ENABLE ); 
+ response = LIS3DH_SetIntConfiguration(	LIS3DH_INT1_ZHIE_ENABLE | LIS3DH_INT1_ZLIE_ENABLE |
+																				LIS3DH_INT1_YHIE_ENABLE | LIS3DH_INT1_YLIE_ENABLE |
+																				LIS3DH_INT1_XHIE_ENABLE | LIS3DH_INT1_XLIE_ENABLE ); 
  if(response==1){
         sprintf((char*)buffer,"SET_INT_CONF_OK \n\r\0");
         USB_SIL_Write(EP1_IN, buffer, 19);

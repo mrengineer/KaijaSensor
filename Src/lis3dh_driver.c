@@ -64,7 +64,7 @@ uint8_t LIS3DH_ReadReg(uint8_t Reg, uint8_t* Data) {
 		
 	HAL_SPI_Receive(&hspi1, Data, sizeof(Data), 0x1000);
 	
-//	printf ("%i\r\n", *Data);
+	//printf ("%i\r\n", *Data);
 
 ACC_DISABLE;
   //To be completed with either I2c or SPI reading function

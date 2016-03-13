@@ -42,6 +42,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern ADC_HandleTypeDef hadc;
+extern RTC_HandleTypeDef hrtc;
 extern SD_HandleTypeDef hsd;
 extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi2;
@@ -53,23 +54,50 @@ extern UART_HandleTypeDef huart2;
 /******************************************************************************/
 
 /**
+* @brief This function handles Hard fault interrupt.
+*/
+void HardFault_IRQHandler(void)
+{
+  /* USER CODE BEGIN HardFault_IRQn 0 */
+
+  /* USER CODE END HardFault_IRQn 0 */
+  while (1)
+  {
+  }
+  /* USER CODE BEGIN HardFault_IRQn 1 */
+
+  /* USER CODE END HardFault_IRQn 1 */
+}
+
+/**
+* @brief This function handles Memory management fault.
+*/
+void MemManage_Handler(void)
+{
+  /* USER CODE BEGIN MemoryManagement_IRQn 0 */
+
+  /* USER CODE END MemoryManagement_IRQn 0 */
+  while (1)
+  {
+  }
+  /* USER CODE BEGIN MemoryManagement_IRQn 1 */
+
+  /* USER CODE END MemoryManagement_IRQn 1 */
+}
+
+/**
 * @brief This function handles System tick timer.
 */
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-		static unsigned int i;
+
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
 	
-	i++;
-	
-	if (i>250) {
-		HAL_GPIO_TogglePin(INDICATOR1_GPIO_Port, INDICATOR1_Pin);
-		i = 0;
-	}
+
 	
   /* USER CODE END SysTick_IRQn 1 */
 }
@@ -80,6 +108,26 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32l1xx.s).                    */
 /******************************************************************************/
+
+/**
+* @brief This function handles RTC wake-up interrupt through EXTI line 20.
+*/
+void RTC_WKUP_IRQHandler(void)
+{
+  /* USER CODE BEGIN RTC_WKUP_IRQn 0 */
+	/* IMPORTANT!    IN INIT of RTC must have or it will not work!
+		HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
+		HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 1, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+	*/
+	
+	HAL_ResumeTick();
+	HAL_GPIO_TogglePin(INDICATOR3_GPIO_Port, INDICATOR3_Pin);
+  /* USER CODE END RTC_WKUP_IRQn 0 */
+  HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);
+  /* USER CODE BEGIN RTC_WKUP_IRQn 1 */
+
+  /* USER CODE END RTC_WKUP_IRQn 1 */
+}
 
 /**
 * @brief This function handles ADC global interrupt.
@@ -166,6 +214,21 @@ void SDIO_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+void EXTI0_IRQHandler (void) {
+}
+
+void EXTI1_IRQHandler (void) {
+}
+
+void EXTI2_IRQHandler (void) {
+}
+
+void EXTI3_IRQHandler (void) {
+}
+
+void EXTI4_IRQHandler (void) {
+}
 
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

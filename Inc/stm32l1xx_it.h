@@ -45,7 +45,10 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
+void HardFault_IRQHandler(void);
+void MemManage_Handler(void);
 void SysTick_Handler(void);
+void RTC_WKUP_IRQHandler(void);
 void ADC1_IRQHandler(void);
 void SPI1_IRQHandler(void);
 void SPI2_IRQHandler(void);

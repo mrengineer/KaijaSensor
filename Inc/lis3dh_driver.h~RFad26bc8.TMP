@@ -359,7 +359,7 @@ LIS3DH_NO_CLICK                        =               0x00
 #define LIS3DH_INT1_DURATION                           0x33
 
 //INTERRUPT 1 SOURCE REGISTER
-#define LIS3DH_INT1_SRC																 0x31
+#define LIS3DH_INT1_SRC				0x31
 
 //FIFO Source Register bit Mask
 #define LIS3DH_FIFO_SRC_WTM                            0x80
@@ -367,7 +367,7 @@ LIS3DH_NO_CLICK                        =               0x00
 #define LIS3DH_FIFO_SRC_EMPTY                          0x20
   
 //INTERRUPT CLICK REGISTER
-#define LIS3DH_CLICK_CFG															 0x38
+#define LIS3DH_CLICK_CFG				0x38
 //INTERRUPT CLICK CONFIGURATION bit mask
 #define LIS3DH_ZD_ENABLE                               0x20
 #define LIS3DH_ZD_DISABLE                              0x00
