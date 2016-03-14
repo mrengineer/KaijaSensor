@@ -57,6 +57,7 @@ uint8_t LIS3DH_ReadReg(uint8_t Reg, uint8_t* Data) {
 
 	
   ACC_ENABLE;
+	HAL_Delay(1);
 	
 	SetBit(Reg, 7);		//For reading register first bit of address must be set 1. Datasheet page 23 for LIS3DH. As it send as MSB => bit is 7
 	address = Reg; //0x8F; //10001111 - WHO_AM_I - READ
@@ -67,9 +68,10 @@ uint8_t LIS3DH_ReadReg(uint8_t Reg, uint8_t* Data) {
 	//printf ("%i\r\n", *Data);
 
 ACC_DISABLE;
+	HAL_Delay(1);
   //To be completed with either I2c or SPI reading function
   //i.e. *Data = SPI_Mems_Read_Reg( Reg );  
-  return *Data;
+  return 1;
 }
 
 
@@ -86,6 +88,7 @@ u8_t LIS3DH_WriteReg(u8_t WriteAddr, u8_t Data) {
 	uint8_t address = 0;
 	
   ACC_ENABLE;
+	HAL_Delay(1);
 	
 	ClearBit(WriteAddr, 7);		//For WRITING register first bit of address must be set 0. Datasheet page 24 for LIS3DH. As it send as MSB => bit is 7
 	ClearBit(WriteAddr, 6);		//MS bit. 0 for single data byte 1 for multiple bytes with increment. Datasheet page 24 for LIS3DH. As it send as MSB => bit is 6
@@ -96,6 +99,7 @@ u8_t LIS3DH_WriteReg(u8_t WriteAddr, u8_t Data) {
 	HAL_SPI_Transmit(&hspi1, &Data, sizeof(Data), 0x1000);
 
 	ACC_DISABLE;
+	HAL_Delay(1);
 	
   //To be completed with either I2c or SPI writing function
   //i.e. SPI_Mems_Write_Reg(WriteAddr, Data);  
@@ -255,14 +259,15 @@ status_t LIS3DH_SetODR(LIS3DH_ODR_t ov){
   
   if( !LIS3DH_ReadReg(LIS3DH_CTRL_REG1, &value) )
     return MEMS_ERROR;
-  
+  	
   value &= 0x0f;
   value |= ov<<LIS3DH_ODR_BIT;
   
   if( !LIS3DH_WriteReg(LIS3DH_CTRL_REG1, value) )
     return MEMS_ERROR;
+ 
   
-  return MEMS_SUCCESS;
+	return MEMS_SUCCESS;
 }
 
 

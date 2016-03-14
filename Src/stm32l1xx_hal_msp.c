@@ -180,8 +180,14 @@ void HAL_SD_MspInit(SD_HandleTypeDef* hsd)
     PC12     ------> SDIO_CK
     PD2     ------> SDIO_CMD 
     */
-    GPIO_InitStruct.Pin = SD_DAT0_Pin|SD_DAT1_Pin|SD_DAT2_Pin|SD_DAT3_Pin 
-                          |SD_CLK_Pin;
+    GPIO_InitStruct.Pin = SD_DAT0_Pin|SD_DAT1_Pin|SD_DAT2_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF12_SDIO;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = SD_DAT3_Pin|SD_CLK_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
@@ -190,7 +196,7 @@ void HAL_SD_MspInit(SD_HandleTypeDef* hsd)
 
     GPIO_InitStruct.Pin = SD_CMD_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF12_SDIO;
     HAL_GPIO_Init(SD_CMD_GPIO_Port, &GPIO_InitStruct);

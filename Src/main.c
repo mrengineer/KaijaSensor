@@ -40,8 +40,8 @@
 #include "power.h"
 
 //Acc
-#define ACC_ENABLE			HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_RESET)
-#define ACC_DISABLE			HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_SET)
+#define ACC_ENABLE					HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_RESET)
+#define ACC_DISABLE					HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_SET)
 
 // Magnetic sensors		----------------------------------------------------------------------------------------
 //Power management
@@ -185,13 +185,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
- // MX_ADC_Init();
- // MX_SDIO_SD_Init();
+  //MX_ADC_Init();
+  //MX_SDIO_SD_Init();
   MX_SPI1_Init();
- // MX_SPI2_Init();
- // MX_USART1_UART_Init();
- // MX_USART2_UART_Init();
- // MX_FATFS_Init();
+  //MX_SPI2_Init();
+  //MX_USART1_UART_Init();
+  //MX_USART2_UART_Init();
+  //MX_FATFS_Init();
   MX_RTC_Init();
 
   /* USER CODE BEGIN 2 */
@@ -204,9 +204,9 @@ int main(void)
 	
 	
 	// init gpio before!
-//	UC_2_8V;			//minimal power
+	UC_2_8V;			//minimal power
 	
-goto skp;
+//goto skp;
 	
 	//ENABLE_2_5V;	//DC-DC enable
 	SD_PWR_ON;		//Power to SD card
@@ -214,7 +214,6 @@ goto skp;
 	
 	HAL_Delay(50);
   MX_SDIO_SD_Init();
-
   MX_FATFS_Init();
 
 /*##-1- FatFS: Link the SD disk I/O driver ##########*/
@@ -230,7 +229,7 @@ goto skp;
 	 
 		 if(res != FR_OK){
 				 /* FatFs Initialization Error : set the red LED on */
-				 IND1_ON;
+				 printf ("Problem fmount\r\n");
 				 while(1);
 		 } else {
 				/*##-3- Create a FAT file system (format) on the logical drive#*/
@@ -238,14 +237,13 @@ goto skp;
 					res = f_mkfs((TCHAR const*)SD_Path, 0, 0);
 					if(res != FR_OK){
 						 /* FatFs Format Error : set the red LED on */
-				//		 ORANGE_ON;
-						IND1_ON;
+							printf ("Problem f_mkfs\r\n");
 						 while(1);
 					} else {
 						/*##-4- Create & Open a new text file object with write access#*/
 						 if(f_open(&MyFile, "Hello.txt", FA_CREATE_ALWAYS | FA_WRITE) != FR_OK){
 								 /* 'Hello.txt' file Open for write Error : set the red LED on */
-								 IND2_ON;
+								 printf ("Problem f_open\r\n");
 								 while(1);
 						 } else {
 								 /*##-5- Write data to the text file ####################*/
@@ -253,7 +251,7 @@ goto skp;
 									 
 								 if((byteswritten == 0) || (res != FR_OK)){
 										 /* 'Hello.txt' file Write or EOF Error : set the red LED on */
-										 IND3_ON;
+										 printf ("Problem f_write\r\n");
 										 while(1);
 								 } else {
 									 
@@ -265,13 +263,14 @@ goto skp;
 										 if(f_open(&MyFile, "Hello.txt", FA_READ) != FR_OK){
 												 /* 'Hello.txt' file Open for read Error : set the red LED on */
 												//HAL_GPIO_WritePin(GPIOG, GPIO_PIN_10, GPIO_PIN_RESET);
+													printf ("Problem f_open\r\n");
 												 while(1);
 										 } else {
 												 /*##-8- Read data from the text file #########*/
 												 res = f_read(&MyFile, rtext, sizeof(wtext), &bytesread);
 												 if((strcmp(rtext,wtext)!=0)|| (res != FR_OK)){
 													 /* 'Hello.txt' file Read or EOF Error : set the red LED on */
-													 //HAL_GPIO_WritePin(GPIOG, GPIO_PIN_10, GPIO_PIN_RESET);
+													 				 printf ("Problem f_read\r\n");
 													 while(1);
 												 } else {
 													 /* Successful read : set the green LED On */
@@ -288,7 +287,7 @@ goto skp;
  /*##-10- Unlink the micro SD disk I/O driver #########*/
  FATFS_UnLinkDriver(SD_Path);
 
- IND4_ON;
+				 printf ("FAT operation is OK!\r\n");
 
  skp:
  
@@ -297,17 +296,17 @@ goto skp;
 	LIS3DH_GetWHO_AM_I(&resp);
 	printf("LIS3DH_GetWHO_AM_I=%i\r\n", resp);	
 
+	
  
 HAL_Delay(1);
- 
+  
 	LIS3DH_SetODR(LIS3DH_ODR_100Hz);
   LIS3DH_SetMode(LIS3DH_NORMAL);
   LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);
-  LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE);
+  LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE );
   
  // if (LIS3DH_SetInt1Threshold(2) == 1) printf("Threshold is set\r\n");
-
-HAL_Delay(10);
+   HAL_Delay(10);
   //set Interrupt configuration 
 //	if (LIS3DH_SetIntConfiguration(	 
 //																	LIS3DH_INT1_ZHIE_ENABLE | LIS3DH_INT1_ZLIE_ENABLE |
@@ -317,21 +316,27 @@ HAL_Delay(10);
 //	HAL_Delay(10);
 	
 //	if (LIS3DH_SetIntMode(LIS3DH_INT_MODE_6D_POSITION) == 1) printf("INT mode is set\r\n");
-	
-LIS3DH_FIFOModeEnable(LIS3DH_FIFO_MODE);	//Enable store into FIFO
-LIS3DH_SetInt1Duration(64);   // len of irq pulse in n/odr
-LIS3DH_SetWaterMark(18); // watermark for irq generation from fifo 
+
+  HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
+	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN2);
+
+LIS3DH_FIFOModeEnable(LIS3DH_FIFO_STREAM_MODE);	//Enable store into FIFO
+LIS3DH_SetInt1Duration(64);   									// len of irq pulse in n/odr
+LIS3DH_Int1LatchEnable(ENABLE);
+LIS3DH_SetWaterMark(18); 												// watermark for irq generation from fifo 
 
 //Direct IRQ from watemark and overrun to 1st pin. 
 LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_DISABLE | 
-									LIS3DH_I1_INT2_ON_PIN_INT1_DISABLE | LIS3DH_I1_DRDY1_ON_INT1_DISABLE	| 
-									LIS3DH_I1_DRDY2_ON_INT1_DISABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
+									LIS3DH_I1_INT2_ON_PIN_INT1_DISABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE	| 
+									LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
 
-
+while (1) {
+	1+1;
+}
 //ENABLE ALL IRQs
 //LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | LIS3DH_I1_INT2_ON_PIN_INT1_ENABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE | LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
 //LIS3DH_SetInt2Pin(LIS3DH_CLICK_ON_PIN_INT2_DISABLE | LIS3DH_I2_INT1_ON_PIN_INT2_ENABLE | LIS3DH_I2_INT2_ON_PIN_INT2_ENABLE | LIS3DH_I2_BOOT_ON_INT2_ENABLE | LIS3DH_INT_ACTIVE_HIGH);
-	HAL_Delay(2000);
+//	HAL_Delay(2000);
 	
   /* USER CODE END 2 */
 
@@ -344,8 +349,10 @@ LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_
 		
 		if(LIS3DH_GetAccAxesRaw(&data)==1){
 			printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
+		} else {
+			printf("ER\r\n");
 		}
-		HAL_Delay(500);
+		HAL_Delay(50);
 
 		//	lowest_power();		//go to stop. Wakeup on RTC wakeup or 1st or 2d PIN wakeup
   }
@@ -468,9 +475,8 @@ void MX_RTC_Init(void)
 
     /**Enable the WakeUp 
     */
-	HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);	// IRQ from RTC will not operate without this line!
-//  HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 500, RTC_WAKEUPCLOCK_RTCCLK_DIV16);	
- HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 1, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);   //1Hz IRQ
+ 		HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
+		HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 1, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
 
 }
 
@@ -499,7 +505,7 @@ void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLED;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLED;
@@ -578,17 +584,11 @@ void MX_GPIO_Init(void)
   __GPIOB_CLK_ENABLE();
   __GPIOD_CLK_ENABLE();
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, nDISCHARGE_Pin|PWR_TO_2_8V_Pin|ENABLE_2_5V_Pin|INDICATOR2_Pin 
-                          |WIFI_PWR_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, STATUS_Pin|ACC_CS_Pin|HALL_CLAMP_PWR_Pin|RF_PWR_Pin 
-                          |INDICATOR3_Pin|SD_PWR_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, SHUNT_0_06_DISABLE_Pin|HALL_SENS_PWR_Pin|RF_CE_Pin|PWR_TO2_8AND2_9V_Pin 
-                          |INDICATOR1_Pin, GPIO_PIN_RESET);
+  /*Configure GPIO pin : ACC_INT2_Pin */
+  GPIO_InitStruct.Pin = ACC_INT2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ACC_INT2_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : nDISCHARGE_Pin PWR_TO_2_8V_Pin ENABLE_2_5V_Pin INDICATOR2_Pin 
                            WIFI_PWR_Pin */
@@ -598,6 +598,12 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : ACC_INT1_Pin */
+  GPIO_InitStruct.Pin = ACC_INT1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ACC_INT1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : STATUS_Pin ACC_CS_Pin HALL_CLAMP_PWR_Pin RF_PWR_Pin 
                            INDICATOR3_Pin SD_PWR_Pin */
@@ -646,6 +652,22 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(SENS_OPEN_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, nDISCHARGE_Pin|WIFI_PWR_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, PWR_TO_2_8V_Pin|ENABLE_2_5V_Pin|INDICATOR2_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, STATUS_Pin|ACC_CS_Pin|HALL_CLAMP_PWR_Pin|INDICATOR3_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, SHUNT_0_06_DISABLE_Pin|HALL_SENS_PWR_Pin|RF_CE_Pin|PWR_TO2_8AND2_9V_Pin 
+                          |INDICATOR1_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, RF_PWR_Pin|SD_PWR_Pin, GPIO_PIN_SET);
 
 }
 

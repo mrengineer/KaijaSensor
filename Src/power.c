@@ -8,20 +8,6 @@
 #include "power.h"
 #include <stdio.h>
 
-// Set uC DC-DC module power ---------------------------------------------------------------------------------
-#define UC_1_8V HAL_GPIO_WritePin(PWR_TO2_8AND2_9V_GPIO_Port, PWR_TO2_8AND2_9V_Pin, GPIO_PIN_RESET); 	HAL_GPIO_WritePin(PWR_TO_2_8V_GPIO_Port, PWR_TO_2_8V_Pin, GPIO_PIN_RESET)
-#define UC_1_9V HAL_GPIO_WritePin(PWR_TO2_8AND2_9V_GPIO_Port, PWR_TO2_8AND2_9V_Pin, GPIO_PIN_SET);	 	HAL_GPIO_WritePin(PWR_TO_2_8V_GPIO_Port, PWR_TO_2_8V_Pin, GPIO_PIN_RESET)
-#define UC_2_8V HAL_GPIO_WritePin(PWR_TO2_8AND2_9V_GPIO_Port, PWR_TO2_8AND2_9V_Pin, GPIO_PIN_RESET); 	HAL_GPIO_WritePin(PWR_TO_2_8V_GPIO_Port, PWR_TO_2_8V_Pin, GPIO_PIN_SET)
-#define UC_2_9V HAL_GPIO_WritePin(PWR_TO2_8AND2_9V_GPIO_Port, PWR_TO2_8AND2_9V_Pin, GPIO_PIN_SET); 		HAL_GPIO_WritePin(PWR_TO_2_8V_GPIO_Port, PWR_TO_2_8V_Pin, GPIO_PIN_SET)
-
-// Power DC-DC		--------------------------------------------------------------------------------------------
-#define ENABLE_2_5V					HAL_GPIO_WritePin(ENABLE_2_5V_GPIO_Port, ENABLE_2_5V_Pin, GPIO_PIN_SET)
-#define DISABLE_2_5V				HAL_GPIO_WritePin(ENABLE_2_5V_GPIO_Port, ENABLE_2_5V_Pin, GPIO_PIN_RESET)
-
-// Power measurment condensator discharge control
-//nDISCHARGE_Pin
-#define CHARGE		HAL_GPIO_WritePin(nDISCHARGE_GPIO_Port, nDISCHARGE_Pin, GPIO_PIN_SET);  	 //Close discharge transistor
-#define DISCHARGE	HAL_GPIO_WritePin(nDISCHARGE_GPIO_Port, nDISCHARGE_Pin, GPIO_PIN_RESET);   //OPEN discharge transistor
 
 #define ADC_RESOLUTION 4096
 #define gain 100 								//for MAX9938H, see datasheet

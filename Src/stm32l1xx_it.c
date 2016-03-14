@@ -97,6 +97,7 @@ void SysTick_Handler(void)
   HAL_SYSTICK_IRQHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
 	
+		HAL_GPIO_TogglePin(INDICATOR1_GPIO_Port, INDICATOR1_Pin);
 
 	
   /* USER CODE END SysTick_IRQn 1 */
@@ -120,7 +121,7 @@ void RTC_WKUP_IRQHandler(void)
 		HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 1, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
 	*/
 	
-	HAL_ResumeTick();
+	//HAL_ResumeTick();
 	HAL_GPIO_TogglePin(INDICATOR3_GPIO_Port, INDICATOR3_Pin);
   /* USER CODE END RTC_WKUP_IRQn 0 */
   HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);
@@ -215,20 +216,7 @@ void SDIO_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
-void EXTI0_IRQHandler (void) {
-}
 
-void EXTI1_IRQHandler (void) {
-}
-
-void EXTI2_IRQHandler (void) {
-}
-
-void EXTI3_IRQHandler (void) {
-}
-
-void EXTI4_IRQHandler (void) {
-}
 
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
