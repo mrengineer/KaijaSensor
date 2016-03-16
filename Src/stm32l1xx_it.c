@@ -97,7 +97,7 @@ void SysTick_Handler(void)
   HAL_SYSTICK_IRQHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
 	
-		HAL_GPIO_TogglePin(INDICATOR1_GPIO_Port, INDICATOR1_Pin);
+//	HAL_GPIO_TogglePin(INDICATOR1_GPIO_Port, INDICATOR1_Pin);
 
 	
   /* USER CODE END SysTick_IRQn 1 */
@@ -122,7 +122,7 @@ void RTC_WKUP_IRQHandler(void)
 	*/
 	
 	//HAL_ResumeTick();
-	HAL_GPIO_TogglePin(INDICATOR3_GPIO_Port, INDICATOR3_Pin);
+	//HAL_GPIO_TogglePin(INDICATOR3_GPIO_Port, INDICATOR3_Pin);
   /* USER CODE END RTC_WKUP_IRQn 0 */
   HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);
   /* USER CODE BEGIN RTC_WKUP_IRQn 1 */
@@ -215,6 +215,16 @@ void SDIO_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+void EXTI0_IRQHandler(void) 
+{	
+	HAL_GPIO_WritePin(STATUS_GPIO_Port, STATUS_Pin, GPIO_PIN_SET);
+	HAL_Delay(10);
+	HAL_GPIO_WritePin(STATUS_GPIO_Port, STATUS_Pin, GPIO_PIN_RESET); 
+	printf("EXTI0\r\n");
+//	HAL_Delay(10);
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+}
 
 
 

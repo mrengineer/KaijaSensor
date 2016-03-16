@@ -119,6 +119,7 @@ static void MX_SPI2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_RTC_Init(void);
+static void EXTI0_IRQHandler_Config(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -185,17 +186,21 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  //MX_ADC_Init();
+  MX_ADC_Init();
   //MX_SDIO_SD_Init();
   MX_SPI1_Init();
-  //MX_SPI2_Init();
-  //MX_USART1_UART_Init();
-  //MX_USART2_UART_Init();
+  MX_SPI2_Init();
+  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
   //MX_FATFS_Init();
   MX_RTC_Init();
 
   /* USER CODE BEGIN 2 */
-	
+	HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
+	HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 1, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+
+  EXTI0_IRQHandler_Config();
+		
 	HAL_DBGMCU_EnableDBGStopMode();
 
 
@@ -204,9 +209,9 @@ int main(void)
 	
 	
 	// init gpio before!
-	UC_2_8V;			//minimal power
+	UC_2_8V;
 	
-//goto skp;
+goto skp;
 	
 	//ENABLE_2_5V;	//DC-DC enable
 	SD_PWR_ON;		//Power to SD card
@@ -273,6 +278,7 @@ int main(void)
 													 				 printf ("Problem f_read\r\n");
 													 while(1);
 												 } else {
+													 printf ("FAT operation done OK!\r\n");
 													 /* Successful read : set the green LED On */
 													 //HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);
 													 /*##-9- Close the open text file ################*/
@@ -287,8 +293,6 @@ int main(void)
  /*##-10- Unlink the micro SD disk I/O driver #########*/
  FATFS_UnLinkDriver(SD_Path);
 
-				 printf ("FAT operation is OK!\r\n");
-
  skp:
  
 	printf("FW start\r\n");
@@ -300,38 +304,45 @@ int main(void)
  
 HAL_Delay(1);
   
-	LIS3DH_SetODR(LIS3DH_ODR_100Hz);
-  LIS3DH_SetMode(LIS3DH_NORMAL);
-  LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);
-  LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE );
-  
- // if (LIS3DH_SetInt1Threshold(2) == 1) printf("Threshold is set\r\n");
-   HAL_Delay(10);
-  //set Interrupt configuration 
-//	if (LIS3DH_SetIntConfiguration(	 
-//																	LIS3DH_INT1_ZHIE_ENABLE | LIS3DH_INT1_ZLIE_ENABLE |
-//																	LIS3DH_INT1_YHIE_ENABLE | LIS3DH_INT1_YLIE_ENABLE |
-//																	LIS3DH_INT1_XHIE_ENABLE | LIS3DH_INT1_XLIE_ENABLE) ==1) printf("INT 1 is set\r\n");
- 
-//	HAL_Delay(10);
-	
-//	if (LIS3DH_SetIntMode(LIS3DH_INT_MODE_6D_POSITION) == 1) printf("INT mode is set\r\n");
 
   HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
 	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN2);
 
-LIS3DH_FIFOModeEnable(LIS3DH_FIFO_STREAM_MODE);	//Enable store into FIFO
+LIS3DH_FIFOModeEnable(LIS3DH_FIFO_MODE);	//Enable store into FIFO
 LIS3DH_SetInt1Duration(64);   									// len of irq pulse in n/odr
-LIS3DH_Int1LatchEnable(ENABLE);
-LIS3DH_SetWaterMark(18); 												// watermark for irq generation from fifo 
+//LIS3DH_SetWaterMark(10); 												// watermark for irq generation from fifo 
 
 //Direct IRQ from watemark and overrun to 1st pin. 
-LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_DISABLE | 
-									LIS3DH_I1_INT2_ON_PIN_INT1_DISABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE	| 
-									LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
+LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | 
+									LIS3DH_I1_INT2_ON_PIN_INT1_ENABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE	| 
+									LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_DISABLE | LIS3DH_INT1_OVERRUN_DISABLE);
+
+	LIS3DH_SetODR(LIS3DH_ODR_10Hz);
+  LIS3DH_SetMode(LIS3DH_NORMAL);
+  LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);
+  LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE );
 
 while (1) {
-	1+1;
+	LIS3DH_GetFifoSourceFSS(&resp);
+	printf("%i recs in FIFO\r\n", resp);
+	
+	if (resp > 25) {
+		IND2_ON;
+		rep:
+			LIS3DH_GetAccAxesRaw(&data);		
+			LIS3DH_GetFifoSourceFSS(&resp);
+			printf("> %i recs in FIFO (while)\r\n", resp);
+			HAL_Delay(5);
+		if (resp != 0) goto rep;
+		IND2_OFF;
+	}
+	/*	if(LIS3DH_GetAccAxesRaw(&data)==1){
+			printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
+		} else {
+			printf("ER\r\n");
+		}*/
+		
+	HAL_Delay(5);
 }
 //ENABLE ALL IRQs
 //LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | LIS3DH_I1_INT2_ON_PIN_INT1_ENABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE | LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
@@ -475,8 +486,7 @@ void MX_RTC_Init(void)
 
     /**Enable the WakeUp 
     */
- 		HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
-		HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 1, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
+  HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 1, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
 
 }
 
@@ -586,14 +596,19 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : ACC_INT2_Pin */
   GPIO_InitStruct.Pin = ACC_INT2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(ACC_INT2_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : nDISCHARGE_Pin PWR_TO_2_8V_Pin ENABLE_2_5V_Pin INDICATOR2_Pin 
-                           WIFI_PWR_Pin */
-  GPIO_InitStruct.Pin = nDISCHARGE_Pin|PWR_TO_2_8V_Pin|ENABLE_2_5V_Pin|INDICATOR2_Pin 
-                          |WIFI_PWR_Pin;
+  /*Configure GPIO pin : nDISCHARGE_Pin */
+  GPIO_InitStruct.Pin = nDISCHARGE_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
+  HAL_GPIO_Init(nDISCHARGE_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PWR_TO_2_8V_Pin ENABLE_2_5V_Pin INDICATOR2_Pin WIFI_PWR_Pin */
+  GPIO_InitStruct.Pin = PWR_TO_2_8V_Pin|ENABLE_2_5V_Pin|INDICATOR2_Pin|WIFI_PWR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
@@ -601,57 +616,56 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : ACC_INT1_Pin */
   GPIO_InitStruct.Pin = ACC_INT1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(ACC_INT1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : STATUS_Pin ACC_CS_Pin HALL_CLAMP_PWR_Pin RF_PWR_Pin 
-                           INDICATOR3_Pin SD_PWR_Pin */
-  GPIO_InitStruct.Pin = STATUS_Pin|ACC_CS_Pin|HALL_CLAMP_PWR_Pin|RF_PWR_Pin 
-                          |INDICATOR3_Pin|SD_PWR_Pin;
+  /*Configure GPIO pins : STATUS_Pin ACC_CS_Pin HALL_CLAMP_PWR_Pin INDICATOR3_Pin */
+  GPIO_InitStruct.Pin = STATUS_Pin|ACC_CS_Pin|HALL_CLAMP_PWR_Pin|INDICATOR3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SENS_CLAMP_A_Pin */
-  GPIO_InitStruct.Pin = SENS_CLAMP_A_Pin;
+  /*Configure GPIO pins : SENS_CLAMP_A_Pin SENS_TAKEOFF_Pin */
+  GPIO_InitStruct.Pin = SENS_CLAMP_A_Pin|SENS_TAKEOFF_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(SENS_CLAMP_A_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SENS_TAKEOFF_Pin */
-  GPIO_InitStruct.Pin = SENS_TAKEOFF_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  /*Configure GPIO pins : SHUNT_0_06_DISABLE_Pin RF_CE_Pin */
+  GPIO_InitStruct.Pin = SHUNT_0_06_DISABLE_Pin|RF_CE_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(SENS_TAKEOFF_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SHUNT_0_06_DISABLE_Pin HALL_SENS_PWR_Pin RF_CE_Pin PWR_TO2_8AND2_9V_Pin 
-                           INDICATOR1_Pin */
-  GPIO_InitStruct.Pin = SHUNT_0_06_DISABLE_Pin|HALL_SENS_PWR_Pin|RF_CE_Pin|PWR_TO2_8AND2_9V_Pin 
-                          |INDICATOR1_Pin;
+  /*Configure GPIO pin : HALL_SENS_PWR_Pin */
+  GPIO_InitStruct.Pin = HALL_SENS_PWR_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
+  HAL_GPIO_Init(HALL_SENS_PWR_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : RF_PWR_Pin SD_PWR_Pin */
+  GPIO_InitStruct.Pin = RF_PWR_Pin|SD_PWR_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PWR_TO2_8AND2_9V_Pin INDICATOR1_Pin */
+  GPIO_InitStruct.Pin = PWR_TO2_8AND2_9V_Pin|INDICATOR1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SENS_CLAMP_B_Pin */
-  GPIO_InitStruct.Pin = SENS_CLAMP_B_Pin;
+  /*Configure GPIO pins : SENS_CLAMP_B_Pin RF_IRQ_Pin SENS_OPEN_Pin */
+  GPIO_InitStruct.Pin = SENS_CLAMP_B_Pin|RF_IRQ_Pin|SENS_OPEN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(SENS_CLAMP_B_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : RF_IRQ_Pin */
-  GPIO_InitStruct.Pin = RF_IRQ_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(RF_IRQ_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : SENS_OPEN_Pin */
-  GPIO_InitStruct.Pin = SENS_OPEN_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(SENS_OPEN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, nDISCHARGE_Pin|WIFI_PWR_Pin, GPIO_PIN_SET);
@@ -672,6 +686,37 @@ void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void EXTI0_IRQHandler_Config(void)
+{
+  GPIO_InitTypeDef   GPIO_InitStructure;
+
+  /* Enable GPIOC clock */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /* Configure PA.0 pin as input floating */
+  GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStructure.Pull = GPIO_NOPULL;
+  GPIO_InitStructure.Pin = GPIO_PIN_0;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  /* Enable and set EXTI lines 15 to 10 Interrupt to the lowest priority */
+  HAL_NVIC_SetPriority(EXTI0_IRQn , 2, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn );
+}
+
+/**
+  * @brief EXTI line detection callbacks
+  * @param GPIO_Pin: Specifies the pins connected EXTI line
+  * @retval None
+  */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin == GPIO_PIN_0)
+  {
+    /* Toggle LED2 */
+		printf("HELLO FROM CLBK\r\n");
+  }
+}
 
 /* USER CODE END 4 */
 
