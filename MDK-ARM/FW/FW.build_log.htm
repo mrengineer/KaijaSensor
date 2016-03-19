@@ -27,7 +27,24 @@ Project File Date:  03/15/2016
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 (build 20)', folder: 'C:\Keil\ARM\ARMCC\Bin'
 Build target 'FW'
-"FW\FW.axf" - 0 Error(s), 0 Warning(s).
+compiling main.c...
+../Src/main.c(217): warning:  #111-D: statement is unreachable
+  	
+D_PWR_ON;		//Power to SD card
+../Src/main.c(276): warning:  #223-D: function "strcmp" declared implicitly
+  												 if((strcmp(rtext,wtext)!=0)|| (res != FR_OK)){
+../Src/main.c(302): warning:  #223-D: function "LIS3DH_GetIntCounter" declared implicitly
+  	LIS3DH_GetIntCounter(&resp);
+../Src/main.c(305): warning:  #223-D: function "LIS3DH_ReadReg" declared implicitly
+   	LIS3DH_ReadReg(LIS3DH_CTRL_REG3, &resp);
+../Src/main.c(333): warning:  #188-D: enumerated type mixed with another type
+  	LIS3DH_Int1LatchEnable(DISABLE);
+../Src/main.c(393): warning:  #128-D: loop is not reachable
+    while (1)  {
+../Src/main.c: 6 warnings, 0 errors
+linking...
+Program Size: Code=17760 RO-data=356 RW-data=28 ZI-data=2756  
+"FW\FW.axf" - 0 Error(s), 6 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -45,7 +62,7 @@ Package Vendor: ARM
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:4.3.0
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>

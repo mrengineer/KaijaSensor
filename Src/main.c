@@ -1,4 +1,4 @@
-/**
+/**	19.03.2016
   ******************************************************************************
   * File Name          : main.c
   * Description        : Main program body
@@ -316,9 +316,9 @@ goto skp;
 
 
 	//Direct IRQ from watemark and overrun to 1st pin. reg3
-	LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_ENABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | 
-										LIS3DH_I1_INT2_ON_PIN_INT1_ENABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE	| 
-										LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
+	LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | 
+										LIS3DH_I1_INT2_ON_PIN_INT1_DISABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE	| 
+										LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_DISABLE);
 
 
 
@@ -331,6 +331,9 @@ goto skp;
 	
   LIS3DH_FIFOModeEnable(LIS3DH_FIFO_STREAM_MODE);	//Enable store into FIFO reg5
 	LIS3DH_Int1LatchEnable(DISABLE);
+	LIS3DH_SetIntConfiguration(LIS3DH_INT1_OR | LIS3DH_INT1_ZHIE_DISABLE | LIS3DH_INT1_ZLIE_DISABLE | 
+															LIS3DH_INT1_YHIE_DISABLE | LIS3DH_INT1_YLIE_DISABLE | 
+															LIS3DH_INT1_XHIE_DISABLE | LIS3DH_INT1_XLIE_DISABLE );
 	
  	LIS3DH_ReadReg(LIS3DH_CTRL_REG3, &resp);
 	printf("REG3=%i\r\n", resp);	
@@ -350,7 +353,7 @@ while (1) {
 	
 	//LIS3DH_GetIntCounter(&resp);
 	//printf("Interrupts counter=%i\r\n", resp);	
-	if (resp > 15) {
+	if (resp > 25) {
 		IND2_ON;
 		//rep:
 			//LIS3DH_GetFifoSourceFSS(&resp);
@@ -376,7 +379,7 @@ while (1) {
 	}
 
 		
-	HAL_Delay(40);
+	HAL_Delay(30);
 }
 //ENABLE ALL IRQs
 //LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | LIS3DH_I1_INT2_ON_PIN_INT1_ENABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE | LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
