@@ -959,6 +959,28 @@ status_t LIS3DH_Int1LatchEnable(State_t latch) {
   return MEMS_SUCCESS;
 }
 
+/*******************************************************************************
+* Function Name  : LIS3DH_Reboot
+* Description    : Set BOOT bit to reboot memory
+* Input          : None
+* Output         : None
+* Return         : Status [MEMS_ERROR, MEMS_SUCCESS]
+*******************************************************************************/
+status_t LIS3DH_Reboot() {
+  u8_t value;
+  
+  if( !LIS3DH_ReadReg(LIS3DH_CTRL_REG5, &value) )
+    return MEMS_ERROR;
+  
+  value &= 0xF7;
+  value |= 1<<LIS3DH_BOOT;
+  
+  if( !LIS3DH_WriteReg(LIS3DH_CTRL_REG5, value) )
+    return MEMS_ERROR;
+  
+  return MEMS_SUCCESS;
+}
+
 
 /*******************************************************************************
 * Function Name  : LIS3DH_ResetInt1Latch
@@ -1415,6 +1437,100 @@ status_t LIS3DH_GetStatusBit(u8_t statusBIT, u8_t* val) {
   return MEMS_ERROR;
 }
 
+/*******************************************************************************
+* Function Name  : LIS3DH_GetStatusBIT
+* Description    : Read the status register BIT
+* Input          : LIS3DH_I1_CLICK, LIS3DH_I1_AOI1, LIS3DH_I1_AOI2, LIS3DH_I1_DRDY1 
+									 LIS3DH_I1_DRDY2, LIS3DH_I1_WTM,  LIS3DH_I1_ORUN, LIS3DH_DATAREADY_BIT
+val: Byte to be filled with the register bit	
+* Output         : register BIT
+* Return         : Status [MEMS_ERROR, MEMS_SUCCESS]
+*******************************************************************************/
+status_t LIS3DH_GetReg3Bit(u8_t registerBIT, u8_t* val) {
+  u8_t value;  
+  
+  if( !LIS3DH_ReadReg(LIS3DH_CTRL_REG3, &value) )
+    return MEMS_ERROR;
+  
+  switch (registerBIT){
+  case LIS3DH_I1_CLICK:     
+    if(value &= LIS3DH_I1_CLICK){     
+      *val = MEMS_SET;
+      return MEMS_SUCCESS;
+    }
+    else{  
+      *val = MEMS_RESET;
+      return MEMS_SUCCESS;
+    }  
+  case LIS3DH_I1_AOI1:       
+    if(value &= LIS3DH_I1_AOI1){     
+      *val = MEMS_SET;
+      return MEMS_SUCCESS;
+    }
+    else{  
+      *val = MEMS_RESET;
+      return MEMS_SUCCESS;
+    }  
+  case LIS3DH_I1_AOI2:       
+    if(value &= LIS3DH_I1_AOI2){     
+      *val = MEMS_SET;
+      return MEMS_SUCCESS;
+    }
+    else{  
+      *val = MEMS_RESET;
+      return MEMS_SUCCESS;
+    }                                 
+  case LIS3DH_I1_DRDY1:       
+    if(value &= LIS3DH_I1_DRDY1){     
+      *val = MEMS_SET;
+      return MEMS_SUCCESS;
+    }
+    else{  
+      *val = MEMS_RESET;
+      return MEMS_SUCCESS;
+    }     
+  case LIS3DH_I1_DRDY2:     
+    if(value &= LIS3DH_I1_DRDY2){     
+      *val = MEMS_SET;
+      return MEMS_SUCCESS;
+    }
+    else{  
+      *val = MEMS_RESET;
+      return MEMS_SUCCESS;
+    }   
+  case LIS3DH_I1_WTM:       
+    if(value &= LIS3DH_I1_WTM){     
+      *val = MEMS_SET;
+      return MEMS_SUCCESS;
+    }
+    else{  
+      *val = MEMS_RESET;
+      return MEMS_SUCCESS;
+    }   
+  case LIS3DH_I1_ORUN:       
+    if(value &= LIS3DH_I1_ORUN){     
+      *val = MEMS_SET;
+      return MEMS_SUCCESS;
+    }
+    else{  
+      *val = MEMS_RESET;
+      return MEMS_SUCCESS;
+    }   
+  case LIS3DH_DATAREADY_BIT:       
+    if(value &= LIS3DH_DATAREADY_BIT){     
+      *val = MEMS_SET;
+      return MEMS_SUCCESS;
+    }
+    else{  
+      *val = MEMS_RESET;
+      return MEMS_SUCCESS;
+    }                                  
+    
+  }
+  return MEMS_ERROR;
+}
+
+
 
 /*******************************************************************************
 * Function Name  : LIS3DH_GetAccAxesRaw
@@ -1455,6 +1571,22 @@ status_t LIS3DH_GetAccAxesRaw(AxesRaw_t* buff) {
   return MEMS_SUCCESS; 
 }
 
+
+
+/*******************************************************************************
+* Function Name  : LIS3DH_GetIntCounter
+* Description    : Reset Interrupt 1 Latching function
+* Input          : Char return value
+* Output         : None
+* Return         : Status [MEMS_ERROR, MEMS_SUCCESS]
+*******************************************************************************/
+status_t LIS3DH_GetIntCounter(u8_t* val) {
+  
+  if( !LIS3DH_ReadReg(LIS3DH_INT_COUNTER, val) )
+    return MEMS_ERROR;
+  
+  return MEMS_SUCCESS;
+}
 
 /*******************************************************************************
 * Function Name  : LIS3DH_GetInt1Src

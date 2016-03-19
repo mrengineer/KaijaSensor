@@ -299,50 +299,84 @@ goto skp;
 
 	LIS3DH_GetWHO_AM_I(&resp);
 	printf("LIS3DH_GetWHO_AM_I=%i\r\n", resp);	
-
+	LIS3DH_GetIntCounter(&resp);
+	printf("Interrupts counter=%i\r\n", resp);	
 	
- 
-HAL_Delay(1);
-  
+ 	LIS3DH_ReadReg(LIS3DH_CTRL_REG3, &resp);
+	printf("REG3=%i\r\n", resp);	
 
   HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
 	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN2);
 
-LIS3DH_FIFOModeEnable(LIS3DH_FIFO_MODE);	//Enable store into FIFO
-LIS3DH_SetInt1Duration(64);   									// len of irq pulse in n/odr
-//LIS3DH_SetWaterMark(10); 												// watermark for irq generation from fifo 
 
-//Direct IRQ from watemark and overrun to 1st pin. 
-LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | 
-									LIS3DH_I1_INT2_ON_PIN_INT1_ENABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE	| 
-									LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_DISABLE | LIS3DH_INT1_OVERRUN_DISABLE);
 
-	LIS3DH_SetODR(LIS3DH_ODR_10Hz);
-  LIS3DH_SetMode(LIS3DH_NORMAL);
-  LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);
-  LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE );
+  LIS3DH_SetMode(LIS3DH_NORMAL); 				//reg1
+	LIS3DH_SetODR(LIS3DH_ODR_10Hz); 			//reg1
+	LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE ); //reg1
+
+
+	//Direct IRQ from watemark and overrun to 1st pin. reg3
+	LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_ENABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | 
+										LIS3DH_I1_INT2_ON_PIN_INT1_ENABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE	| 
+										LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
+
+
+
+  LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);  //reg4
+	
+	LIS3DH_SetTriggerInt(LIS3DH_TRIG_INT1);
+	
+	LIS3DH_SetWaterMark(10); 												// watermark for irq generation from fifo  LIS3DH_FIFO_CTRL_REG
+	LIS3DH_SetInt1Duration(24);   									// len of irq pulse in n/odr INT1_DUR
+	
+  LIS3DH_FIFOModeEnable(LIS3DH_FIFO_STREAM_MODE);	//Enable store into FIFO reg5
+	LIS3DH_Int1LatchEnable(DISABLE);
+	
+ 	LIS3DH_ReadReg(LIS3DH_CTRL_REG3, &resp);
+	printf("REG3=%i\r\n", resp);	
+	
+ 
+HAL_Delay(4000);
 
 while (1) {
+	LIS3DH_GetFifoSourceBit(LIS3DH_FIFO_SRC_WTM, &resp);
+	printf("WTM  %i  ", resp);
+	
+	LIS3DH_GetReg3Bit(LIS3DH_I1_WTM, &resp);
+	printf("WMBIT  %i  ", resp);
+	
 	LIS3DH_GetFifoSourceFSS(&resp);
 	printf("%i recs in FIFO\r\n", resp);
 	
-	if (resp > 25) {
+	//LIS3DH_GetIntCounter(&resp);
+	//printf("Interrupts counter=%i\r\n", resp);	
+	if (resp > 15) {
 		IND2_ON;
+		//rep:
+			//LIS3DH_GetFifoSourceFSS(&resp);
+			//printf("> %i recs in FIFO (while)\r\n", resp);
+			//HAL_Delay(15);
+		//LIS3DH_GetInt1Src(&resp);
 		rep:
-			LIS3DH_GetAccAxesRaw(&data);		
-			LIS3DH_GetFifoSourceFSS(&resp);
-			printf("> %i recs in FIFO (while)\r\n", resp);
-			HAL_Delay(5);
-		if (resp != 0) goto rep;
-		IND2_OFF;
-	}
-	/*	if(LIS3DH_GetAccAxesRaw(&data)==1){
-			printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
+		if(LIS3DH_GetAccAxesRaw(&data)==1){
+				LIS3DH_GetFifoSourceBit(LIS3DH_FIFO_SRC_WTM, &resp);
+				//printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
+			printf("  READ WTM%i\r\n", resp);
 		} else {
-			printf("ER\r\n");
-		}*/
+				printf("ER\r\n");
+		}
 		
-	HAL_Delay(5);
+		LIS3DH_GetFifoSourceFSS(&resp);
+		if (resp > 0) goto rep;
+		
+		LIS3DH_FIFOModeEnable(LIS3DH_FIFO_STREAM_MODE);
+		IND2_OFF;
+	} else {
+		//LIS3DH_FIFOModeEnable(LIS3DH_FIFO_MODE);
+	}
+
+		
+	HAL_Delay(40);
 }
 //ENABLE ALL IRQs
 //LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | LIS3DH_I1_INT2_ON_PIN_INT1_ENABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE | LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
