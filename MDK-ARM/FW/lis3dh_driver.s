@@ -817,13 +817,13 @@ LIS3DH_GetInt1SrcBit PROC
         ENDP
 
 
-        AREA ||i.LIS3DH_GetStatusAUX||, CODE, READONLY, ALIGN=1
+        AREA ||i.LIS3DH_GetIntCounter||, CODE, READONLY, ALIGN=1
 
-LIS3DH_GetStatusAUX PROC
+LIS3DH_GetIntCounter PROC
         PUSH     {r4,lr}
         MOV      r4,r0
         MOV      r1,r4
-        MOVS     r0,#7
+        MOVS     r0,#0xe
         BL       LIS3DH_ReadReg
         CBNZ     r0,|L10.18|
         MOVS     r0,#0
@@ -835,67 +835,61 @@ LIS3DH_GetStatusAUX PROC
         ENDP
 
 
-        AREA ||i.LIS3DH_GetStatusAUXBit||, CODE, READONLY, ALIGN=1
+        AREA ||i.LIS3DH_GetReg3Bit||, CODE, READONLY, ALIGN=1
 
-LIS3DH_GetStatusAUXBit PROC
+LIS3DH_GetReg3Bit PROC
         PUSH     {r3-r5,lr}
         MOV      r5,r0
         MOV      r4,r1
         MOV      r1,sp
-        MOVS     r0,#7
+        MOVS     r0,#0x22
         BL       LIS3DH_ReadReg
         CBNZ     r0,|L11.20|
         MOVS     r0,#0
 |L11.18|
         POP      {r3-r5,pc}
 |L11.20|
-        CMP      r5,#0x80
-        BNE      |L11.50|
+        CMP      r5,#8
+        BCS      |L11.218|
+        TBB      [pc,r5]
+        DCB      0x5f,0x52,0x45,0x38
+        DCB      0x2b,0x1e,0x11,0x04
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0x80
         STR      r0,[sp,#0]
-        CBZ      r0,|L11.42|
+        CBZ      r0,|L11.54|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
         B        |L11.18|
-|L11.42|
+|L11.54|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
         B        |L11.18|
-|L11.50|
-        CMP      r5,#0x40
-        BNE      |L11.80|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0x40
         STR      r0,[sp,#0]
-        CBZ      r0,|L11.72|
+        CBZ      r0,|L11.80|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
         B        |L11.18|
-|L11.72|
+|L11.80|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
         B        |L11.18|
-|L11.80|
-        CMP      r5,#0x20
-        BNE      |L11.110|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0x20
         STR      r0,[sp,#0]
-        CBZ      r0,|L11.102|
+        CBZ      r0,|L11.106|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
         B        |L11.18|
-|L11.102|
+|L11.106|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
         B        |L11.18|
-|L11.110|
-        CMP      r5,#0x10
-        BNE      |L11.140|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0x10
         STR      r0,[sp,#0]
@@ -908,69 +902,202 @@ LIS3DH_GetStatusAUXBit PROC
         STRB     r0,[r4,#0]
         MOVS     r0,#1
         B        |L11.18|
-|L11.140|
-        CMP      r5,#8
-        BNE      |L11.170|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#8
         STR      r0,[sp,#0]
-        CBZ      r0,|L11.162|
+        CBZ      r0,|L11.158|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
         B        |L11.18|
-|L11.162|
+|L11.158|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
         B        |L11.18|
-|L11.170|
-        CMP      r5,#4
-        BNE      |L11.200|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#4
         STR      r0,[sp,#0]
-        CBZ      r0,|L11.192|
+        CBZ      r0,|L11.184|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
         B        |L11.18|
-|L11.192|
+|L11.184|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
         B        |L11.18|
-|L11.200|
-        CMP      r5,#2
-        BNE      |L11.230|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#2
         STR      r0,[sp,#0]
-        CBZ      r0,|L11.222|
+        CBZ      r0,|L11.210|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
         B        |L11.18|
-|L11.222|
+|L11.210|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
         B        |L11.18|
-|L11.230|
+|L11.218|
+        MOVS     r0,#0
+        B        |L11.18|
+        ENDP
+
+
+        AREA ||i.LIS3DH_GetStatusAUX||, CODE, READONLY, ALIGN=1
+
+LIS3DH_GetStatusAUX PROC
+        PUSH     {r4,lr}
+        MOV      r4,r0
+        MOV      r1,r4
+        MOVS     r0,#7
+        BL       LIS3DH_ReadReg
+        CBNZ     r0,|L12.18|
+        MOVS     r0,#0
+|L12.16|
+        POP      {r4,pc}
+|L12.18|
+        MOVS     r0,#1
+        B        |L12.16|
+        ENDP
+
+
+        AREA ||i.LIS3DH_GetStatusAUXBit||, CODE, READONLY, ALIGN=1
+
+LIS3DH_GetStatusAUXBit PROC
+        PUSH     {r3-r5,lr}
+        MOV      r5,r0
+        MOV      r4,r1
+        MOV      r1,sp
+        MOVS     r0,#7
+        BL       LIS3DH_ReadReg
+        CBNZ     r0,|L13.20|
+        MOVS     r0,#0
+|L13.18|
+        POP      {r3-r5,pc}
+|L13.20|
+        CMP      r5,#0x80
+        BNE      |L13.50|
+        LDRB     r0,[sp,#0]
+        AND      r0,r0,#0x80
+        STR      r0,[sp,#0]
+        CBZ      r0,|L13.42|
+        MOVS     r0,#1
+        STRB     r0,[r4,#0]
+        B        |L13.18|
+|L13.42|
+        MOVS     r0,#0
+        STRB     r0,[r4,#0]
+        MOVS     r0,#1
+        B        |L13.18|
+|L13.50|
+        CMP      r5,#0x40
+        BNE      |L13.80|
+        LDRB     r0,[sp,#0]
+        AND      r0,r0,#0x40
+        STR      r0,[sp,#0]
+        CBZ      r0,|L13.72|
+        MOVS     r0,#1
+        STRB     r0,[r4,#0]
+        B        |L13.18|
+|L13.72|
+        MOVS     r0,#0
+        STRB     r0,[r4,#0]
+        MOVS     r0,#1
+        B        |L13.18|
+|L13.80|
+        CMP      r5,#0x20
+        BNE      |L13.110|
+        LDRB     r0,[sp,#0]
+        AND      r0,r0,#0x20
+        STR      r0,[sp,#0]
+        CBZ      r0,|L13.102|
+        MOVS     r0,#1
+        STRB     r0,[r4,#0]
+        B        |L13.18|
+|L13.102|
+        MOVS     r0,#0
+        STRB     r0,[r4,#0]
+        MOVS     r0,#1
+        B        |L13.18|
+|L13.110|
+        CMP      r5,#0x10
+        BNE      |L13.140|
+        LDRB     r0,[sp,#0]
+        AND      r0,r0,#0x10
+        STR      r0,[sp,#0]
+        CBZ      r0,|L13.132|
+        MOVS     r0,#1
+        STRB     r0,[r4,#0]
+        B        |L13.18|
+|L13.132|
+        MOVS     r0,#0
+        STRB     r0,[r4,#0]
+        MOVS     r0,#1
+        B        |L13.18|
+|L13.140|
+        CMP      r5,#8
+        BNE      |L13.170|
+        LDRB     r0,[sp,#0]
+        AND      r0,r0,#8
+        STR      r0,[sp,#0]
+        CBZ      r0,|L13.162|
+        MOVS     r0,#1
+        STRB     r0,[r4,#0]
+        B        |L13.18|
+|L13.162|
+        MOVS     r0,#0
+        STRB     r0,[r4,#0]
+        MOVS     r0,#1
+        B        |L13.18|
+|L13.170|
+        CMP      r5,#4
+        BNE      |L13.200|
+        LDRB     r0,[sp,#0]
+        AND      r0,r0,#4
+        STR      r0,[sp,#0]
+        CBZ      r0,|L13.192|
+        MOVS     r0,#1
+        STRB     r0,[r4,#0]
+        B        |L13.18|
+|L13.192|
+        MOVS     r0,#0
+        STRB     r0,[r4,#0]
+        MOVS     r0,#1
+        B        |L13.18|
+|L13.200|
+        CMP      r5,#2
+        BNE      |L13.230|
+        LDRB     r0,[sp,#0]
+        AND      r0,r0,#2
+        STR      r0,[sp,#0]
+        CBZ      r0,|L13.222|
+        MOVS     r0,#1
+        STRB     r0,[r4,#0]
+        B        |L13.18|
+|L13.222|
+        MOVS     r0,#0
+        STRB     r0,[r4,#0]
+        MOVS     r0,#1
+        B        |L13.18|
+|L13.230|
         CMP      r5,#1
-        BNE      |L11.260|
+        BNE      |L13.260|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#1
         STR      r0,[sp,#0]
-        CBZ      r0,|L11.252|
+        CBZ      r0,|L13.252|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
-        B        |L11.18|
-|L11.252|
+        B        |L13.18|
+|L13.252|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
-        B        |L11.18|
-|L11.260|
+        B        |L13.18|
+|L13.260|
         MOVS     r0,#0
-        B        |L11.18|
+        B        |L13.18|
         ENDP
 
 
@@ -983,136 +1110,136 @@ LIS3DH_GetStatusBit PROC
         MOV      r1,sp
         MOVS     r0,#0x27
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L12.20|
+        CBNZ     r0,|L14.20|
         MOVS     r0,#0
-|L12.18|
+|L14.18|
         POP      {r3-r5,pc}
-|L12.20|
+|L14.20|
         CMP      r5,#0x10
-        BEQ      |L12.134|
-        BGT      |L12.44|
+        BEQ      |L14.134|
+        BGT      |L14.44|
         CMP      r5,#1
-        BEQ      |L12.238|
+        BEQ      |L14.238|
         CMP      r5,#2
-        BEQ      |L12.212|
+        BEQ      |L14.212|
         CMP      r5,#4
-        BEQ      |L12.186|
+        BEQ      |L14.186|
         CMP      r5,#8
-        BNE      |L12.264|
-        B        |L12.160|
-|L12.44|
+        BNE      |L14.264|
+        B        |L14.160|
+|L14.44|
         CMP      r5,#0x20
-        BEQ      |L12.108|
+        BEQ      |L14.108|
         CMP      r5,#0x40
-        BEQ      |L12.82|
+        BEQ      |L14.82|
         CMP      r5,#0x80
-        BNE      |L12.264|
+        BNE      |L14.264|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0x80
         STR      r0,[sp,#0]
-        CBZ      r0,|L12.74|
+        CBZ      r0,|L14.74|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
-        B        |L12.18|
-|L12.74|
+        B        |L14.18|
+|L14.74|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
-        B        |L12.18|
-|L12.82|
+        B        |L14.18|
+|L14.82|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0x40
         STR      r0,[sp,#0]
-        CBZ      r0,|L12.100|
+        CBZ      r0,|L14.100|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
-        B        |L12.18|
-|L12.100|
+        B        |L14.18|
+|L14.100|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
-        B        |L12.18|
-|L12.108|
+        B        |L14.18|
+|L14.108|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0x20
         STR      r0,[sp,#0]
-        CBZ      r0,|L12.126|
+        CBZ      r0,|L14.126|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
-        B        |L12.18|
-|L12.126|
+        B        |L14.18|
+|L14.126|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
-        B        |L12.18|
-|L12.134|
+        B        |L14.18|
+|L14.134|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0x10
         STR      r0,[sp,#0]
-        CBZ      r0,|L12.152|
+        CBZ      r0,|L14.152|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
-        B        |L12.18|
-|L12.152|
+        B        |L14.18|
+|L14.152|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
-        B        |L12.18|
-|L12.160|
+        B        |L14.18|
+|L14.160|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#8
         STR      r0,[sp,#0]
-        CBZ      r0,|L12.178|
+        CBZ      r0,|L14.178|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
-        B        |L12.18|
-|L12.178|
+        B        |L14.18|
+|L14.178|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
-        B        |L12.18|
-|L12.186|
+        B        |L14.18|
+|L14.186|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#4
         STR      r0,[sp,#0]
-        CBZ      r0,|L12.204|
+        CBZ      r0,|L14.204|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
-        B        |L12.18|
-|L12.204|
+        B        |L14.18|
+|L14.204|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
-        B        |L12.18|
-|L12.212|
+        B        |L14.18|
+|L14.212|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#2
         STR      r0,[sp,#0]
-        CBZ      r0,|L12.230|
+        CBZ      r0,|L14.230|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
-        B        |L12.18|
-|L12.230|
+        B        |L14.18|
+|L14.230|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
-        B        |L12.18|
-|L12.238|
+        B        |L14.18|
+|L14.238|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#1
         STR      r0,[sp,#0]
-        CBZ      r0,|L12.256|
+        CBZ      r0,|L14.256|
         MOVS     r0,#1
         STRB     r0,[r4,#0]
-        B        |L12.18|
-|L12.256|
+        B        |L14.18|
+|L14.256|
         MOVS     r0,#0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
-        B        |L12.18|
-|L12.264|
+        B        |L14.18|
+|L14.264|
         MOVS     r0,#0
-        B        |L12.18|
+        B        |L14.18|
         ENDP
 
 
@@ -1124,13 +1251,13 @@ LIS3DH_GetStatusReg PROC
         MOV      r1,r4
         MOVS     r0,#0x27
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L13.18|
+        CBNZ     r0,|L15.18|
         MOVS     r0,#0
-|L13.16|
+|L15.16|
         POP      {r4,pc}
-|L13.18|
+|L15.18|
         MOVS     r0,#1
-        B        |L13.16|
+        B        |L15.16|
         ENDP
 
 
@@ -1142,23 +1269,23 @@ LIS3DH_GetTempRaw PROC
         ADD      r1,sp,#4
         MOVS     r0,#0xc
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L14.18|
+        CBNZ     r0,|L16.18|
         MOVS     r0,#0
-|L14.16|
+|L16.16|
         POP      {r2-r4,pc}
-|L14.18|
+|L16.18|
         MOV      r1,sp
         MOVS     r0,#0xd
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L14.32|
+        CBNZ     r0,|L16.32|
         MOVS     r0,#0
-        B        |L14.16|
-|L14.32|
+        B        |L16.16|
+|L16.32|
         LDRB     r0,[sp,#0]
         SXTB     r0,r0
         STRB     r0,[r4,#0]
         MOVS     r0,#1
-        B        |L14.16|
+        B        |L16.16|
         ENDP
 
 
@@ -1170,13 +1297,13 @@ LIS3DH_GetWHO_AM_I PROC
         MOV      r1,r4
         MOVS     r0,#0xf
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L15.18|
+        CBNZ     r0,|L17.18|
         MOVS     r0,#0
-|L15.16|
+|L17.16|
         POP      {r4,pc}
-|L15.18|
+|L17.18|
         MOVS     r0,#1
-        B        |L15.16|
+        B        |L17.16|
         ENDP
 
 
@@ -1188,11 +1315,11 @@ LIS3DH_HPFAOI1Enable PROC
         MOV      r1,sp
         MOVS     r0,#0x21
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L16.18|
+        CBNZ     r0,|L18.18|
         MOVS     r0,#0
-|L16.16|
+|L18.16|
         POP      {r3-r5,pc}
-|L16.18|
+|L18.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xfe
         STR      r0,[sp,#0]
@@ -1202,12 +1329,12 @@ LIS3DH_HPFAOI1Enable PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x21
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L16.52|
+        CBNZ     r0,|L18.52|
         MOVS     r0,#0
-        B        |L16.16|
-|L16.52|
+        B        |L18.16|
+|L18.52|
         MOVS     r0,#1
-        B        |L16.16|
+        B        |L18.16|
         ENDP
 
 
@@ -1219,11 +1346,11 @@ LIS3DH_HPFAOI2Enable PROC
         MOV      r1,sp
         MOVS     r0,#0x21
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L17.18|
+        CBNZ     r0,|L19.18|
         MOVS     r0,#0
-|L17.16|
+|L19.16|
         POP      {r3-r5,pc}
-|L17.18|
+|L19.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xfd
         STR      r0,[sp,#0]
@@ -1234,12 +1361,12 @@ LIS3DH_HPFAOI2Enable PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x21
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L17.56|
+        CBNZ     r0,|L19.56|
         MOVS     r0,#0
-        B        |L17.16|
-|L17.56|
+        B        |L19.16|
+|L19.56|
         MOVS     r0,#1
-        B        |L17.16|
+        B        |L19.16|
         ENDP
 
 
@@ -1251,11 +1378,11 @@ LIS3DH_HPFClickEnable PROC
         MOV      r1,sp
         MOVS     r0,#0x21
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L18.18|
+        CBNZ     r0,|L20.18|
         MOVS     r0,#0
-|L18.16|
+|L20.16|
         POP      {r3-r5,pc}
-|L18.18|
+|L20.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xfb
         STR      r0,[sp,#0]
@@ -1266,12 +1393,12 @@ LIS3DH_HPFClickEnable PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x21
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L18.56|
+        CBNZ     r0,|L20.56|
         MOVS     r0,#0
-        B        |L18.16|
-|L18.56|
+        B        |L20.16|
+|L20.56|
         MOVS     r0,#1
-        B        |L18.16|
+        B        |L20.16|
         ENDP
 
 
@@ -1283,11 +1410,11 @@ LIS3DH_Int1LatchEnable PROC
         MOV      r1,sp
         MOVS     r0,#0x24
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L19.18|
+        CBNZ     r0,|L21.18|
         MOVS     r0,#0
-|L19.16|
+|L21.16|
         POP      {r3-r5,pc}
-|L19.18|
+|L21.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xf7
         STR      r0,[sp,#0]
@@ -1298,35 +1425,85 @@ LIS3DH_Int1LatchEnable PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x24
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L19.56|
+        CBNZ     r0,|L21.56|
         MOVS     r0,#0
-        B        |L19.16|
-|L19.56|
+        B        |L21.16|
+|L21.56|
         MOVS     r0,#1
-        B        |L19.16|
+        B        |L21.16|
         ENDP
 
 
         AREA ||i.LIS3DH_ReadReg||, CODE, READONLY, ALIGN=2
 
 LIS3DH_ReadReg PROC
-        PUSH     {r0,r1,r4,lr}
-        SUB      sp,sp,#8
-        MOV      r4,r1
-        MOV      r0,#0xffff
-        MOVS     r3,#1
-        ADD      r2,sp,#4
-        ADD      r1,sp,#8
+        PUSH     {r3-r5,lr}
+        MOV      r4,r0
+        MOV      r5,r1
+        MOVS     r0,#0
         STR      r0,[sp,#0]
-        LDR      r0,|L20.32|
-        BL       HAL_SPI_TransmitReceive
-        LDRB     r0,[sp,#4]
-        ADD      sp,sp,#0x10
-        POP      {r4,pc}
+        MOVS     r2,#0
+        MOVS     r1,#0x10
+        LDR      r0,|L22.80|
+        BL       HAL_GPIO_WritePin
+        MOVS     r0,#1
+        BL       HAL_Delay
+        ORR      r4,r4,#0x80
+        STR      r4,[sp,#0]
+        MOV      r3,#0x1000
+        MOVS     r2,#1
+        MOV      r1,sp
+        LDR      r0,|L22.84|
+        BL       HAL_SPI_Transmit
+        MOV      r3,#0x1000
+        MOVS     r2,#4
+        MOV      r1,r5
+        LDR      r0,|L22.84|
+        BL       HAL_SPI_Receive
+        MOVS     r2,#1
+        MOVS     r1,#0x10
+        LDR      r0,|L22.80|
+        BL       HAL_GPIO_WritePin
+        MOVS     r0,#1
+        BL       HAL_Delay
+        MOVS     r0,#1
+        POP      {r3-r5,pc}
         ENDP
 
-|L20.32|
+|L22.80|
+        DCD      0x40020000
+|L22.84|
         DCD      hspi1
+
+        AREA ||i.LIS3DH_Reboot||, CODE, READONLY, ALIGN=1
+
+LIS3DH_Reboot PROC
+        PUSH     {r3,lr}
+        MOV      r1,sp
+        MOVS     r0,#0x24
+        BL       LIS3DH_ReadReg
+        CBNZ     r0,|L23.16|
+        MOVS     r0,#0
+|L23.14|
+        POP      {r3,pc}
+|L23.16|
+        LDRB     r0,[sp,#0]
+        AND      r0,r0,#0xf7
+        STR      r0,[sp,#0]
+        LDRB     r0,[sp,#0]
+        ORR      r0,r0,#0x80
+        STR      r0,[sp,#0]
+        LDRB     r1,[sp,#0]
+        MOVS     r0,#0x24
+        BL       LIS3DH_WriteReg
+        CBNZ     r0,|L23.52|
+        MOVS     r0,#0
+        B        |L23.14|
+|L23.52|
+        MOVS     r0,#1
+        B        |L23.14|
+        ENDP
+
 
         AREA ||i.LIS3DH_ResetInt1Latch||, CODE, READONLY, ALIGN=1
 
@@ -1335,13 +1512,13 @@ LIS3DH_ResetInt1Latch PROC
         MOV      r1,sp
         MOVS     r0,#0x31
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L21.16|
+        CBNZ     r0,|L24.16|
         MOVS     r0,#0
-|L21.14|
+|L24.14|
         POP      {r3,pc}
-|L21.16|
+|L24.16|
         MOVS     r0,#1
-        B        |L21.14|
+        B        |L24.14|
         ENDP
 
 
@@ -1353,11 +1530,11 @@ LIS3DH_SetADCAux PROC
         MOV      r1,sp
         MOVS     r0,#0x1f
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L22.18|
+        CBNZ     r0,|L25.18|
         MOVS     r0,#0
-|L22.16|
+|L25.16|
         POP      {r3-r5,pc}
-|L22.18|
+|L25.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0x7f
         STR      r0,[sp,#0]
@@ -1368,12 +1545,12 @@ LIS3DH_SetADCAux PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x1f
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L22.56|
+        CBNZ     r0,|L25.56|
         MOVS     r0,#0
-        B        |L22.16|
-|L22.56|
+        B        |L25.16|
+|L25.56|
         MOVS     r0,#1
-        B        |L22.16|
+        B        |L25.16|
         ENDP
 
 
@@ -1385,11 +1562,11 @@ LIS3DH_SetAxis PROC
         MOV      r1,sp
         MOVS     r0,#0x20
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L23.18|
+        CBNZ     r0,|L26.18|
         MOVS     r0,#0
-|L23.16|
+|L26.16|
         POP      {r3-r5,pc}
-|L23.18|
+|L26.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xf8
         STR      r0,[sp,#0]
@@ -1400,12 +1577,12 @@ LIS3DH_SetAxis PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x20
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L23.56|
+        CBNZ     r0,|L26.56|
         MOVS     r0,#0
-        B        |L23.16|
-|L23.56|
+        B        |L26.16|
+|L26.56|
         MOVS     r0,#1
-        B        |L23.16|
+        B        |L26.16|
         ENDP
 
 
@@ -1417,11 +1594,11 @@ LIS3DH_SetBDU PROC
         MOV      r1,sp
         MOVS     r0,#0x23
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L24.18|
+        CBNZ     r0,|L27.18|
         MOVS     r0,#0
-|L24.16|
+|L27.16|
         POP      {r3-r5,pc}
-|L24.18|
+|L27.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0x7f
         STR      r0,[sp,#0]
@@ -1432,12 +1609,12 @@ LIS3DH_SetBDU PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x23
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L24.56|
+        CBNZ     r0,|L27.56|
         MOVS     r0,#0
-        B        |L24.16|
-|L24.56|
+        B        |L27.16|
+|L27.56|
         MOVS     r0,#1
-        B        |L24.16|
+        B        |L27.16|
         ENDP
 
 
@@ -1449,11 +1626,11 @@ LIS3DH_SetBLE PROC
         MOV      r1,sp
         MOVS     r0,#0x23
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L25.18|
+        CBNZ     r0,|L28.18|
         MOVS     r0,#0
-|L25.16|
+|L28.16|
         POP      {r3-r5,pc}
-|L25.18|
+|L28.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xbf
         STR      r0,[sp,#0]
@@ -1464,12 +1641,12 @@ LIS3DH_SetBLE PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x23
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L25.56|
+        CBNZ     r0,|L28.56|
         MOVS     r0,#0
-        B        |L25.16|
-|L25.56|
+        B        |L28.16|
+|L28.56|
         MOVS     r0,#1
-        B        |L25.16|
+        B        |L28.16|
         ENDP
 
 
@@ -1481,11 +1658,11 @@ LIS3DH_SetClickCFG PROC
         MOV      r1,sp
         MOVS     r0,#0x38
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L26.18|
+        CBNZ     r0,|L29.18|
         MOVS     r0,#0
-|L26.16|
+|L29.16|
         POP      {r3-r5,pc}
-|L26.18|
+|L29.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xc0
         STR      r0,[sp,#0]
@@ -1495,94 +1672,94 @@ LIS3DH_SetClickCFG PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x38
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L26.52|
+        CBNZ     r0,|L29.52|
         MOVS     r0,#0
-        B        |L26.16|
-|L26.52|
+        B        |L29.16|
+|L29.52|
         MOVS     r0,#1
-        B        |L26.16|
+        B        |L29.16|
         ENDP
 
 
         AREA ||i.LIS3DH_SetClickLATENCY||, CODE, READONLY, ALIGN=1
 
 LIS3DH_SetClickLATENCY PROC
-        PUSH     {lr}
-        MOV      r3,r0
-        MOV      r1,r3
+        PUSH     {r4,lr}
+        MOV      r4,r0
+        MOV      r1,r4
         MOVS     r0,#0x3c
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L27.18|
+        CBNZ     r0,|L30.18|
         MOVS     r0,#0
-|L27.16|
-        POP      {pc}
-|L27.18|
+|L30.16|
+        POP      {r4,pc}
+|L30.18|
         MOVS     r0,#1
-        B        |L27.16|
+        B        |L30.16|
         ENDP
 
 
         AREA ||i.LIS3DH_SetClickLIMIT||, CODE, READONLY, ALIGN=1
 
 LIS3DH_SetClickLIMIT PROC
-        PUSH     {lr}
-        MOV      r3,r0
-        CMP      r3,#0x7f
-        BLE      |L28.12|
+        PUSH     {r4,lr}
+        MOV      r4,r0
+        CMP      r4,#0x7f
+        BLE      |L31.12|
         MOVS     r0,#0
-|L28.10|
-        POP      {pc}
-|L28.12|
-        MOV      r1,r3
+|L31.10|
+        POP      {r4,pc}
+|L31.12|
+        MOV      r1,r4
         MOVS     r0,#0x3b
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L28.26|
+        CBNZ     r0,|L31.26|
         MOVS     r0,#0
-        B        |L28.10|
-|L28.26|
+        B        |L31.10|
+|L31.26|
         MOVS     r0,#1
-        B        |L28.10|
+        B        |L31.10|
         ENDP
 
 
         AREA ||i.LIS3DH_SetClickTHS||, CODE, READONLY, ALIGN=1
 
 LIS3DH_SetClickTHS PROC
-        PUSH     {lr}
-        MOV      r3,r0
-        CMP      r3,#0x7f
-        BLE      |L29.12|
+        PUSH     {r4,lr}
+        MOV      r4,r0
+        CMP      r4,#0x7f
+        BLE      |L32.12|
         MOVS     r0,#0
-|L29.10|
-        POP      {pc}
-|L29.12|
-        MOV      r1,r3
+|L32.10|
+        POP      {r4,pc}
+|L32.12|
+        MOV      r1,r4
         MOVS     r0,#0x3a
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L29.26|
+        CBNZ     r0,|L32.26|
         MOVS     r0,#0
-        B        |L29.10|
-|L29.26|
+        B        |L32.10|
+|L32.26|
         MOVS     r0,#1
-        B        |L29.10|
+        B        |L32.10|
         ENDP
 
 
         AREA ||i.LIS3DH_SetClickWINDOW||, CODE, READONLY, ALIGN=1
 
 LIS3DH_SetClickWINDOW PROC
-        PUSH     {lr}
-        MOV      r3,r0
-        MOV      r1,r3
+        PUSH     {r4,lr}
+        MOV      r4,r0
+        MOV      r1,r4
         MOVS     r0,#0x3d
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L30.18|
+        CBNZ     r0,|L33.18|
         MOVS     r0,#0
-|L30.16|
-        POP      {pc}
-|L30.18|
+|L33.16|
+        POP      {r4,pc}
+|L33.18|
         MOVS     r0,#1
-        B        |L30.16|
+        B        |L33.16|
         ENDP
 
 
@@ -1594,117 +1771,16 @@ LIS3DH_SetFilterDataSel PROC
         MOV      r1,sp
         MOVS     r0,#0x21
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L31.18|
-        MOVS     r0,#0
-|L31.16|
-        POP      {r3-r5,pc}
-|L31.18|
-        LDRB     r0,[sp,#0]
-        AND      r0,r0,#0xf7
-        STR      r0,[sp,#0]
-        LDRB     r0,[sp,#0]
-        ORR      r0,r0,r4,LSL #3
-        UXTB     r0,r0
-        STR      r0,[sp,#0]
-        LDRB     r1,[sp,#0]
-        MOVS     r0,#0x21
-        BL       LIS3DH_WriteReg
-        CBNZ     r0,|L31.56|
-        MOVS     r0,#0
-        B        |L31.16|
-|L31.56|
-        MOVS     r0,#1
-        B        |L31.16|
-        ENDP
-
-
-        AREA ||i.LIS3DH_SetFullScale||, CODE, READONLY, ALIGN=1
-
-LIS3DH_SetFullScale PROC
-        PUSH     {r3-r5,lr}
-        MOV      r4,r0
-        MOV      r1,sp
-        MOVS     r0,#0x23
-        BL       LIS3DH_ReadReg
-        CBNZ     r0,|L32.18|
-        MOVS     r0,#0
-|L32.16|
-        POP      {r3-r5,pc}
-|L32.18|
-        LDRB     r0,[sp,#0]
-        AND      r0,r0,#0xcf
-        STR      r0,[sp,#0]
-        LDRB     r0,[sp,#0]
-        ORR      r0,r0,r4,LSL #4
-        UXTB     r0,r0
-        STR      r0,[sp,#0]
-        LDRB     r1,[sp,#0]
-        MOVS     r0,#0x23
-        BL       LIS3DH_WriteReg
-        CBNZ     r0,|L32.56|
-        MOVS     r0,#0
-        B        |L32.16|
-|L32.56|
-        MOVS     r0,#1
-        B        |L32.16|
-        ENDP
-
-
-        AREA ||i.LIS3DH_SetHPFCutOFF||, CODE, READONLY, ALIGN=1
-
-LIS3DH_SetHPFCutOFF PROC
-        PUSH     {r3-r5,lr}
-        MOV      r4,r0
-        CMP      r4,#3
-        BLE      |L33.12|
-        MOVS     r0,#0
-|L33.10|
-        POP      {r3-r5,pc}
-|L33.12|
-        MOV      r1,sp
-        MOVS     r0,#0x21
-        BL       LIS3DH_ReadReg
-        CBNZ     r0,|L33.26|
-        MOVS     r0,#0
-        B        |L33.10|
-|L33.26|
-        LDRB     r0,[sp,#0]
-        AND      r0,r0,#0xcf
-        STR      r0,[sp,#0]
-        LDRB     r0,[sp,#0]
-        ORR      r0,r0,r4,LSL #4
-        UXTB     r0,r0
-        STR      r0,[sp,#0]
-        LDRB     r1,[sp,#0]
-        MOVS     r0,#0x21
-        BL       LIS3DH_WriteReg
-        CBNZ     r0,|L33.64|
-        MOVS     r0,#0
-        B        |L33.10|
-|L33.64|
-        MOVS     r0,#1
-        B        |L33.10|
-        ENDP
-
-
-        AREA ||i.LIS3DH_SetHPFMode||, CODE, READONLY, ALIGN=1
-
-LIS3DH_SetHPFMode PROC
-        PUSH     {r3-r5,lr}
-        MOV      r4,r0
-        MOV      r1,sp
-        MOVS     r0,#0x21
-        BL       LIS3DH_ReadReg
         CBNZ     r0,|L34.18|
         MOVS     r0,#0
 |L34.16|
         POP      {r3-r5,pc}
 |L34.18|
         LDRB     r0,[sp,#0]
-        AND      r0,r0,#0x3f
+        AND      r0,r0,#0xf7
         STR      r0,[sp,#0]
         LDRB     r0,[sp,#0]
-        ORR      r0,r0,r4,LSL #6
+        ORR      r0,r0,r4,LSL #3
         UXTB     r0,r0
         STR      r0,[sp,#0]
         LDRB     r1,[sp,#0]
@@ -1719,26 +1795,127 @@ LIS3DH_SetHPFMode PROC
         ENDP
 
 
+        AREA ||i.LIS3DH_SetFullScale||, CODE, READONLY, ALIGN=1
+
+LIS3DH_SetFullScale PROC
+        PUSH     {r3-r5,lr}
+        MOV      r4,r0
+        MOV      r1,sp
+        MOVS     r0,#0x23
+        BL       LIS3DH_ReadReg
+        CBNZ     r0,|L35.18|
+        MOVS     r0,#0
+|L35.16|
+        POP      {r3-r5,pc}
+|L35.18|
+        LDRB     r0,[sp,#0]
+        AND      r0,r0,#0xcf
+        STR      r0,[sp,#0]
+        LDRB     r0,[sp,#0]
+        ORR      r0,r0,r4,LSL #4
+        UXTB     r0,r0
+        STR      r0,[sp,#0]
+        LDRB     r1,[sp,#0]
+        MOVS     r0,#0x23
+        BL       LIS3DH_WriteReg
+        CBNZ     r0,|L35.56|
+        MOVS     r0,#0
+        B        |L35.16|
+|L35.56|
+        MOVS     r0,#1
+        B        |L35.16|
+        ENDP
+
+
+        AREA ||i.LIS3DH_SetHPFCutOFF||, CODE, READONLY, ALIGN=1
+
+LIS3DH_SetHPFCutOFF PROC
+        PUSH     {r3-r5,lr}
+        MOV      r4,r0
+        CMP      r4,#3
+        BLE      |L36.12|
+        MOVS     r0,#0
+|L36.10|
+        POP      {r3-r5,pc}
+|L36.12|
+        MOV      r1,sp
+        MOVS     r0,#0x21
+        BL       LIS3DH_ReadReg
+        CBNZ     r0,|L36.26|
+        MOVS     r0,#0
+        B        |L36.10|
+|L36.26|
+        LDRB     r0,[sp,#0]
+        AND      r0,r0,#0xcf
+        STR      r0,[sp,#0]
+        LDRB     r0,[sp,#0]
+        ORR      r0,r0,r4,LSL #4
+        UXTB     r0,r0
+        STR      r0,[sp,#0]
+        LDRB     r1,[sp,#0]
+        MOVS     r0,#0x21
+        BL       LIS3DH_WriteReg
+        CBNZ     r0,|L36.64|
+        MOVS     r0,#0
+        B        |L36.10|
+|L36.64|
+        MOVS     r0,#1
+        B        |L36.10|
+        ENDP
+
+
+        AREA ||i.LIS3DH_SetHPFMode||, CODE, READONLY, ALIGN=1
+
+LIS3DH_SetHPFMode PROC
+        PUSH     {r3-r5,lr}
+        MOV      r4,r0
+        MOV      r1,sp
+        MOVS     r0,#0x21
+        BL       LIS3DH_ReadReg
+        CBNZ     r0,|L37.18|
+        MOVS     r0,#0
+|L37.16|
+        POP      {r3-r5,pc}
+|L37.18|
+        LDRB     r0,[sp,#0]
+        AND      r0,r0,#0x3f
+        STR      r0,[sp,#0]
+        LDRB     r0,[sp,#0]
+        ORR      r0,r0,r4,LSL #6
+        UXTB     r0,r0
+        STR      r0,[sp,#0]
+        LDRB     r1,[sp,#0]
+        MOVS     r0,#0x21
+        BL       LIS3DH_WriteReg
+        CBNZ     r0,|L37.56|
+        MOVS     r0,#0
+        B        |L37.16|
+|L37.56|
+        MOVS     r0,#1
+        B        |L37.16|
+        ENDP
+
+
         AREA ||i.LIS3DH_SetInt1Duration||, CODE, READONLY, ALIGN=1
 
 LIS3DH_SetInt1Duration PROC
-        PUSH     {lr}
-        MOV      r3,r0
-        CMP      r3,#0x7f
-        BLE      |L35.12|
+        PUSH     {r4,lr}
+        MOV      r4,r0
+        CMP      r4,#0x7f
+        BLE      |L38.12|
         MOVS     r0,#0
-|L35.10|
-        POP      {pc}
-|L35.12|
-        MOV      r1,r3
+|L38.10|
+        POP      {r4,pc}
+|L38.12|
+        MOV      r1,r4
         MOVS     r0,#0x33
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L35.26|
+        CBNZ     r0,|L38.26|
         MOVS     r0,#0
-        B        |L35.10|
-|L35.26|
+        B        |L38.10|
+|L38.26|
         MOVS     r0,#1
-        B        |L35.10|
+        B        |L38.10|
         ENDP
 
 
@@ -1750,11 +1927,11 @@ LIS3DH_SetInt1Pin PROC
         MOV      r1,sp
         MOVS     r0,#0x22
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L36.18|
+        CBNZ     r0,|L39.18|
         MOVS     r0,#0
-|L36.16|
+|L39.16|
         POP      {r3-r5,pc}
-|L36.18|
+|L39.18|
         MOVS     r0,#0
         STR      r0,[sp,#0]
         LDRB     r0,[sp,#0]
@@ -1763,35 +1940,35 @@ LIS3DH_SetInt1Pin PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x22
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L36.46|
+        CBNZ     r0,|L39.46|
         MOVS     r0,#0
-        B        |L36.16|
-|L36.46|
+        B        |L39.16|
+|L39.46|
         MOVS     r0,#1
-        B        |L36.16|
+        B        |L39.16|
         ENDP
 
 
         AREA ||i.LIS3DH_SetInt1Threshold||, CODE, READONLY, ALIGN=1
 
 LIS3DH_SetInt1Threshold PROC
-        PUSH     {lr}
-        MOV      r3,r0
-        CMP      r3,#0x7f
-        BLE      |L37.12|
+        PUSH     {r4,lr}
+        MOV      r4,r0
+        CMP      r4,#0x7f
+        BLE      |L40.12|
         MOVS     r0,#0
-|L37.10|
-        POP      {pc}
-|L37.12|
-        MOV      r1,r3
+|L40.10|
+        POP      {r4,pc}
+|L40.12|
+        MOV      r1,r4
         MOVS     r0,#0x32
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L37.26|
+        CBNZ     r0,|L40.26|
         MOVS     r0,#0
-        B        |L37.10|
-|L37.26|
+        B        |L40.10|
+|L40.26|
         MOVS     r0,#1
-        B        |L37.10|
+        B        |L40.10|
         ENDP
 
 
@@ -1803,11 +1980,11 @@ LIS3DH_SetInt2Pin PROC
         MOV      r1,sp
         MOVS     r0,#0x25
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L38.18|
+        CBNZ     r0,|L41.18|
         MOVS     r0,#0
-|L38.16|
+|L41.16|
         POP      {r3-r5,pc}
-|L38.18|
+|L41.18|
         MOVS     r0,#0
         STR      r0,[sp,#0]
         LDRB     r0,[sp,#0]
@@ -1816,12 +1993,12 @@ LIS3DH_SetInt2Pin PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x25
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L38.46|
+        CBNZ     r0,|L41.46|
         MOVS     r0,#0
-        B        |L38.16|
-|L38.46|
+        B        |L41.16|
+|L41.46|
         MOVS     r0,#1
-        B        |L38.16|
+        B        |L41.16|
         ENDP
 
 
@@ -1833,20 +2010,20 @@ LIS3DH_SetInt6D4DConfiguration PROC
         ADD      r1,sp,#4
         MOVS     r0,#0x30
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L39.18|
+        CBNZ     r0,|L42.18|
         MOVS     r0,#0
-|L39.16|
+|L42.16|
         POP      {r2-r4,pc}
-|L39.18|
+|L42.18|
         MOV      r1,sp
         MOVS     r0,#0x24
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L39.32|
+        CBNZ     r0,|L42.32|
         MOVS     r0,#0
-        B        |L39.16|
-|L39.32|
+        B        |L42.16|
+|L42.32|
         CMP      r4,#1
-        BNE      |L39.72|
+        BNE      |L42.72|
         LDRB     r0,[sp,#4]
         AND      r0,r0,#0xbf
         STR      r0,[sp,#4]
@@ -1858,9 +2035,9 @@ LIS3DH_SetInt6D4DConfiguration PROC
         STR      r0,[sp,#0]
         LDRB     r0,[sp,#0]
         STR      r0,[sp,#0]
-|L39.72|
+|L42.72|
         CMP      r4,#2
-        BNE      |L39.116|
+        BNE      |L42.116|
         LDRB     r0,[sp,#4]
         AND      r0,r0,#0xbf
         STR      r0,[sp,#4]
@@ -1873,8 +2050,8 @@ LIS3DH_SetInt6D4DConfiguration PROC
         LDRB     r0,[sp,#0]
         ORR      r0,r0,#4
         STR      r0,[sp,#0]
-|L39.116|
-        CBNZ     r4,|L39.150|
+|L42.116|
+        CBNZ     r4,|L42.150|
         LDRB     r0,[sp,#4]
         AND      r0,r0,#0xbf
         STR      r0,[sp,#4]
@@ -1885,23 +2062,23 @@ LIS3DH_SetInt6D4DConfiguration PROC
         STR      r0,[sp,#0]
         LDRB     r0,[sp,#0]
         STR      r0,[sp,#0]
-|L39.150|
+|L42.150|
         LDRB     r1,[sp,#4]
         MOVS     r0,#0x30
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L39.166|
+        CBNZ     r0,|L42.166|
         MOVS     r0,#0
-        B        |L39.16|
-|L39.166|
+        B        |L42.16|
+|L42.166|
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x24
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L39.182|
+        CBNZ     r0,|L42.182|
         MOVS     r0,#0
-        B        |L39.16|
-|L39.182|
+        B        |L42.16|
+|L42.182|
         MOVS     r0,#1
-        B        |L39.16|
+        B        |L42.16|
         ENDP
 
 
@@ -1913,11 +2090,11 @@ LIS3DH_SetIntConfiguration PROC
         MOV      r1,sp
         MOVS     r0,#0x30
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L40.18|
+        CBNZ     r0,|L43.18|
         MOVS     r0,#0
-|L40.16|
+|L43.16|
         POP      {r3-r5,pc}
-|L40.18|
+|L43.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0x40
         STR      r0,[sp,#0]
@@ -1927,12 +2104,12 @@ LIS3DH_SetIntConfiguration PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x30
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L40.52|
+        CBNZ     r0,|L43.52|
         MOVS     r0,#0
-        B        |L40.16|
-|L40.52|
+        B        |L43.16|
+|L43.52|
         MOVS     r0,#1
-        B        |L40.16|
+        B        |L43.16|
         ENDP
 
 
@@ -1944,11 +2121,11 @@ LIS3DH_SetIntMode PROC
         MOV      r1,sp
         MOVS     r0,#0x30
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L41.18|
+        CBNZ     r0,|L44.18|
         MOVS     r0,#0
-|L41.16|
+|L44.16|
         POP      {r3-r5,pc}
-|L41.18|
+|L44.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0x3f
         STR      r0,[sp,#0]
@@ -1959,12 +2136,12 @@ LIS3DH_SetIntMode PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x30
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L41.56|
+        CBNZ     r0,|L44.56|
         MOVS     r0,#0
-        B        |L41.16|
-|L41.56|
+        B        |L44.16|
+|L44.56|
         MOVS     r0,#1
-        B        |L41.16|
+        B        |L44.16|
         ENDP
 
 
@@ -1976,43 +2153,43 @@ LIS3DH_SetMode PROC
         ADD      r1,sp,#4
         MOVS     r0,#0x20
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L42.18|
+        CBNZ     r0,|L45.18|
         MOVS     r0,#0
-|L42.16|
+|L45.16|
         POP      {r2-r4,pc}
-|L42.18|
+|L45.18|
         MOV      r1,sp
         MOVS     r0,#0x23
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L42.32|
+        CBNZ     r0,|L45.32|
         MOVS     r0,#0
-        B        |L42.16|
-|L42.32|
+        B        |L45.16|
+|L45.32|
         LDRB     r0,[sp,#4]
         AND      r0,r0,#0xf0
-        CBNZ     r0,|L42.58|
-        LDR      r0,|L42.208|
+        CBNZ     r0,|L45.58|
+        LDR      r0,|L45.208|
         LDRB     r0,[r0,#0]  ; ODR_old_value
         AND      r0,r0,#0xf0
         LDRB     r1,[sp,#4]
         ORRS     r0,r0,r1
         STR      r0,[sp,#4]
-|L42.58|
-        CBZ      r4,|L42.70|
+|L45.58|
+        CBZ      r4,|L45.70|
         CMP      r4,#1
-        BEQ      |L42.128|
+        BEQ      |L45.128|
         CMP      r4,#2
-        BNE      |L42.166|
-        B        |L42.90|
-|L42.70|
+        BNE      |L45.166|
+        B        |L45.90|
+|L45.70|
         LDRB     r0,[sp,#4]
-        LDR      r1,|L42.208|
+        LDR      r1,|L45.208|
         STRB     r0,[r1,#0]
         LDRB     r0,[sp,#4]
         AND      r0,r0,#0xf
         STR      r0,[sp,#4]
-        B        |L42.170|
-|L42.90|
+        B        |L45.170|
+|L45.90|
         LDRB     r0,[sp,#4]
         AND      r0,r0,#0xf7
         STR      r0,[sp,#4]
@@ -2024,8 +2201,8 @@ LIS3DH_SetMode PROC
         LDRB     r0,[sp,#0]
         ORR      r0,r0,#8
         STR      r0,[sp,#0]
-        B        |L42.170|
-|L42.128|
+        B        |L45.170|
+|L45.128|
         LDRB     r0,[sp,#4]
         AND      r0,r0,#0xf7
         STR      r0,[sp,#4]
@@ -2037,31 +2214,31 @@ LIS3DH_SetMode PROC
         STR      r0,[sp,#0]
         LDRB     r0,[sp,#0]
         STR      r0,[sp,#0]
-        B        |L42.170|
-|L42.166|
+        B        |L45.170|
+|L45.166|
         MOVS     r0,#0
-        B        |L42.16|
-|L42.170|
+        B        |L45.16|
+|L45.170|
         NOP      
         LDRB     r1,[sp,#4]
         MOVS     r0,#0x20
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L42.188|
+        CBNZ     r0,|L45.188|
         MOVS     r0,#0
-        B        |L42.16|
-|L42.188|
+        B        |L45.16|
+|L45.188|
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x23
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L42.204|
+        CBNZ     r0,|L45.204|
         MOVS     r0,#0
-        B        |L42.16|
-|L42.204|
+        B        |L45.16|
+|L45.204|
         MOVS     r0,#1
-        B        |L42.16|
+        B        |L45.16|
         ENDP
 
-|L42.208|
+|L45.208|
         DCD      ODR_old_value
 
         AREA ||i.LIS3DH_SetODR||, CODE, READONLY, ALIGN=1
@@ -2072,11 +2249,11 @@ LIS3DH_SetODR PROC
         MOV      r1,sp
         MOVS     r0,#0x20
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L43.18|
+        CBNZ     r0,|L46.18|
         MOVS     r0,#0
-|L43.16|
+|L46.16|
         POP      {r3-r5,pc}
-|L43.18|
+|L46.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xf
         STR      r0,[sp,#0]
@@ -2087,12 +2264,12 @@ LIS3DH_SetODR PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x20
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L43.56|
+        CBNZ     r0,|L46.56|
         MOVS     r0,#0
-        B        |L43.16|
-|L43.56|
+        B        |L46.16|
+|L46.56|
         MOVS     r0,#1
-        B        |L43.16|
+        B        |L46.16|
         ENDP
 
 
@@ -2104,11 +2281,11 @@ LIS3DH_SetSPIInterface PROC
         MOV      r1,sp
         MOVS     r0,#0x23
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L44.18|
+        CBNZ     r0,|L47.18|
         MOVS     r0,#0
-|L44.16|
+|L47.16|
         POP      {r3-r5,pc}
-|L44.18|
+|L47.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xfe
         STR      r0,[sp,#0]
@@ -2118,12 +2295,12 @@ LIS3DH_SetSPIInterface PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x23
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L44.52|
+        CBNZ     r0,|L47.52|
         MOVS     r0,#0
-        B        |L44.16|
-|L44.52|
+        B        |L47.16|
+|L47.52|
         MOVS     r0,#1
-        B        |L44.16|
+        B        |L47.16|
         ENDP
 
 
@@ -2135,11 +2312,11 @@ LIS3DH_SetSelfTest PROC
         MOV      r1,sp
         MOVS     r0,#0x23
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L45.18|
+        CBNZ     r0,|L48.18|
         MOVS     r0,#0
-|L45.16|
+|L48.16|
         POP      {r3-r5,pc}
-|L45.18|
+|L48.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xf9
         STR      r0,[sp,#0]
@@ -2150,12 +2327,12 @@ LIS3DH_SetSelfTest PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x23
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L45.56|
+        CBNZ     r0,|L48.56|
         MOVS     r0,#0
-        B        |L45.16|
-|L45.56|
+        B        |L48.16|
+|L48.56|
         MOVS     r0,#1
-        B        |L45.16|
+        B        |L48.16|
         ENDP
 
 
@@ -2167,11 +2344,11 @@ LIS3DH_SetTemperature PROC
         MOV      r1,sp
         MOVS     r0,#0x1f
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L46.18|
+        CBNZ     r0,|L49.18|
         MOVS     r0,#0
-|L46.16|
+|L49.16|
         POP      {r3-r5,pc}
-|L46.18|
+|L49.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xbf
         STR      r0,[sp,#0]
@@ -2182,12 +2359,12 @@ LIS3DH_SetTemperature PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x1f
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L46.56|
+        CBNZ     r0,|L49.56|
         MOVS     r0,#0
-        B        |L46.16|
-|L46.56|
+        B        |L49.16|
+|L49.56|
         MOVS     r0,#1
-        B        |L46.16|
+        B        |L49.16|
         ENDP
 
 
@@ -2199,11 +2376,11 @@ LIS3DH_SetTriggerInt PROC
         MOV      r1,sp
         MOVS     r0,#0x2e
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L47.18|
+        CBNZ     r0,|L50.18|
         MOVS     r0,#0
-|L47.16|
+|L50.16|
         POP      {r3-r5,pc}
-|L47.18|
+|L50.18|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xdf
         STR      r0,[sp,#0]
@@ -2214,12 +2391,12 @@ LIS3DH_SetTriggerInt PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x2e
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L47.56|
+        CBNZ     r0,|L50.56|
         MOVS     r0,#0
-        B        |L47.16|
-|L47.56|
+        B        |L50.16|
+|L50.56|
         MOVS     r0,#1
-        B        |L47.16|
+        B        |L50.16|
         ENDP
 
 
@@ -2229,18 +2406,18 @@ LIS3DH_SetWaterMark PROC
         PUSH     {r3-r5,lr}
         MOV      r4,r0
         CMP      r4,#0x1f
-        BLE      |L48.12|
+        BLE      |L51.12|
         MOVS     r0,#0
-|L48.10|
+|L51.10|
         POP      {r3-r5,pc}
-|L48.12|
+|L51.12|
         MOV      r1,sp
         MOVS     r0,#0x2e
         BL       LIS3DH_ReadReg
-        CBNZ     r0,|L48.26|
+        CBNZ     r0,|L51.26|
         MOVS     r0,#0
-        B        |L48.10|
-|L48.26|
+        B        |L51.10|
+|L51.26|
         LDRB     r0,[sp,#0]
         AND      r0,r0,#0xe0
         STR      r0,[sp,#0]
@@ -2250,23 +2427,58 @@ LIS3DH_SetWaterMark PROC
         LDRB     r1,[sp,#0]
         MOVS     r0,#0x2e
         BL       LIS3DH_WriteReg
-        CBNZ     r0,|L48.60|
+        CBNZ     r0,|L51.60|
         MOVS     r0,#0
-        B        |L48.10|
-|L48.60|
+        B        |L51.10|
+|L51.60|
         MOVS     r0,#1
-        B        |L48.10|
+        B        |L51.10|
         ENDP
 
 
-        AREA ||i.LIS3DH_WriteReg||, CODE, READONLY, ALIGN=1
+        AREA ||i.LIS3DH_WriteReg||, CODE, READONLY, ALIGN=2
 
 LIS3DH_WriteReg PROC
-        MOV      r2,r0
+        PUSH     {r0,r1,r4,lr}
+        SUB      sp,sp,#8
+        MOV      r4,r0
+        MOVS     r0,#0
+        STR      r0,[sp,#4]
+        MOVS     r2,#0
+        MOVS     r1,#0x10
+        LDR      r0,|L52.88|
+        BL       HAL_GPIO_WritePin
         MOVS     r0,#1
-        BX       lr
+        BL       HAL_Delay
+        BIC      r4,r4,#0x80
+        BIC      r4,r4,#0x40
+        STR      r4,[sp,#4]
+        MOV      r3,#0x1000
+        MOVS     r2,#1
+        ADD      r1,sp,#4
+        LDR      r0,|L52.92|
+        BL       HAL_SPI_Transmit
+        MOV      r3,#0x1000
+        MOVS     r2,#1
+        ADD      r1,sp,#0xc
+        LDR      r0,|L52.92|
+        BL       HAL_SPI_Transmit
+        MOVS     r2,#1
+        MOVS     r1,#0x10
+        LDR      r0,|L52.88|
+        BL       HAL_GPIO_WritePin
+        MOVS     r0,#1
+        BL       HAL_Delay
+        MOVS     r0,#1
+        ADD      sp,sp,#0x10
+        POP      {r4,pc}
         ENDP
 
+        DCW      0x0000
+|L52.88|
+        DCD      0x40020000
+|L52.92|
+        DCD      hspi1
 
         AREA ||.arm_vfe_header||, DATA, READONLY, NOALLOC, ALIGN=2
 
@@ -2323,6 +2535,8 @@ ODR_old_value
         EXPORT LIS3DH_GetFifoSourceReg [CODE]
         EXPORT LIS3DH_GetInt1Src [CODE]
         EXPORT LIS3DH_GetInt1SrcBit [CODE]
+        EXPORT LIS3DH_GetIntCounter [CODE]
+        EXPORT LIS3DH_GetReg3Bit [CODE]
         EXPORT LIS3DH_GetStatusAUX [CODE]
         EXPORT LIS3DH_GetStatusAUXBit [CODE]
         EXPORT LIS3DH_GetStatusBit [CODE]
@@ -2334,6 +2548,7 @@ ODR_old_value
         EXPORT LIS3DH_HPFClickEnable [CODE]
         EXPORT LIS3DH_Int1LatchEnable [CODE]
         EXPORT LIS3DH_ReadReg [CODE]
+        EXPORT LIS3DH_Reboot [CODE]
         EXPORT LIS3DH_ResetInt1Latch [CODE]
         EXPORT LIS3DH_SetADCAux [CODE]
         EXPORT LIS3DH_SetAxis [CODE]
@@ -2365,7 +2580,10 @@ ODR_old_value
         EXPORT LIS3DH_WriteReg [CODE]
 
         IMPORT ||Lib$$Request$$armlib|| [CODE,WEAK]
-        IMPORT HAL_SPI_TransmitReceive [CODE]
+        IMPORT HAL_GPIO_WritePin [CODE]
+        IMPORT HAL_Delay [CODE]
+        IMPORT HAL_SPI_Transmit [CODE]
+        IMPORT HAL_SPI_Receive [CODE]
         IMPORT hspi1 [DATA]
 
         KEEP ODR_old_value

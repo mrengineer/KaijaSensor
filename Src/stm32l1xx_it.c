@@ -37,6 +37,8 @@
 
 /* USER CODE BEGIN 0 */
 #include "power.h"
+#include "defines.h"
+#include "lis3dh_driver.h"
 
 /* USER CODE END 0 */
 
@@ -216,17 +218,18 @@ void SDIO_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
-void EXTI0_IRQHandler(void) 
-{	
-	HAL_GPIO_WritePin(STATUS_GPIO_Port, STATUS_Pin, GPIO_PIN_SET);
-	HAL_Delay(10);
-	HAL_GPIO_WritePin(STATUS_GPIO_Port, STATUS_Pin, GPIO_PIN_RESET); 
-	printf("EXTI0\r\n");
-//	HAL_Delay(10);
+void EXTI0_IRQHandler(void) {	
+		IND1_ON;
+		LIS3DH_ReadFIFO();
+		IND1_OFF;
+	
 	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
 }
 
-
+void EXTI15_10_IRQHandler(void) 
+{	
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
+}
 
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

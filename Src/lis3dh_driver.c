@@ -27,18 +27,12 @@
 #include "lis3dh_driver.h"
 #include "stm32l1xx_hal.h"
 #include "stm32l1xx_hal_spi.h"
+#include "defines.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-#define   SetBit(reg, bit)          reg |= (1<<bit)            
-#define   ClearBit(reg, bit)       reg &= (~(1<<bit))
-#define   InvBit(reg, bit)          reg ^= (1<<bit)
-#define   BitIsSet(reg, bit)       ((reg & (1<<bit)) != 0)
-#define   BitIsClear(reg, bit)    ((reg & (1<<bit)) == 0)
 
-//Acc
-#define ACC_ENABLE			HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_RESET)
-#define ACC_DISABLE			HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_SET)
+/* Private macro -------------------------------------------------------------*/
+
 /* Private variables ---------------------------------------------------------*/
 extern SPI_HandleTypeDef hspi1;
 /* Private function prototypes -----------------------------------------------*/
@@ -60,7 +54,7 @@ uint8_t LIS3DH_ReadReg(uint8_t Reg, uint8_t* Data) {
 	HAL_Delay(1);
 	
 	SetBit(Reg, 7);		//For reading register first bit of address must be set 1. Datasheet page 23 for LIS3DH. As it send as MSB => bit is 7
-	address = Reg; //0x8F; //10001111 - WHO_AM_I - READ
+	address = Reg; 		//0x8F; //10001111 - WHO_AM_I - READ
 	HAL_SPI_Transmit(&hspi1, &address, sizeof(address), 0x1000);
 		
 	HAL_SPI_Receive(&hspi1, Data, sizeof(Data), 0x1000);
@@ -1454,7 +1448,7 @@ status_t LIS3DH_GetReg3Bit(u8_t registerBIT, u8_t* val) {
   
   switch (registerBIT){
   case LIS3DH_I1_CLICK:     
-    if(value &= LIS3DH_I1_CLICK){     
+    if(value &= LIS3DH_CLICK_ON_PIN_INT1_ENABLE){     
       *val = MEMS_SET;
       return MEMS_SUCCESS;
     }
@@ -1463,7 +1457,7 @@ status_t LIS3DH_GetReg3Bit(u8_t registerBIT, u8_t* val) {
       return MEMS_SUCCESS;
     }  
   case LIS3DH_I1_AOI1:       
-    if(value &= LIS3DH_I1_AOI1){     
+    if(value &= LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE){     
       *val = MEMS_SET;
       return MEMS_SUCCESS;
     }
@@ -1472,7 +1466,7 @@ status_t LIS3DH_GetReg3Bit(u8_t registerBIT, u8_t* val) {
       return MEMS_SUCCESS;
     }  
   case LIS3DH_I1_AOI2:       
-    if(value &= LIS3DH_I1_AOI2){     
+    if(value &= LIS3DH_I1_INT2_ON_PIN_INT1_ENABLE){     
       *val = MEMS_SET;
       return MEMS_SUCCESS;
     }
@@ -1481,7 +1475,7 @@ status_t LIS3DH_GetReg3Bit(u8_t registerBIT, u8_t* val) {
       return MEMS_SUCCESS;
     }                                 
   case LIS3DH_I1_DRDY1:       
-    if(value &= LIS3DH_I1_DRDY1){     
+    if(value &= LIS3DH_I1_DRDY1_ON_INT1_ENABLE){     
       *val = MEMS_SET;
       return MEMS_SUCCESS;
     }
@@ -1490,7 +1484,7 @@ status_t LIS3DH_GetReg3Bit(u8_t registerBIT, u8_t* val) {
       return MEMS_SUCCESS;
     }     
   case LIS3DH_I1_DRDY2:     
-    if(value &= LIS3DH_I1_DRDY2){     
+    if(value &= LIS3DH_I1_DRDY2_ON_INT1_ENABLE){     
       *val = MEMS_SET;
       return MEMS_SUCCESS;
     }
@@ -1499,7 +1493,7 @@ status_t LIS3DH_GetReg3Bit(u8_t registerBIT, u8_t* val) {
       return MEMS_SUCCESS;
     }   
   case LIS3DH_I1_WTM:       
-    if(value &= LIS3DH_I1_WTM){     
+    if(value &= LIS3DH_WTM_ON_INT1_ENABLE){     
       *val = MEMS_SET;
       return MEMS_SUCCESS;
     }
@@ -1508,23 +1502,14 @@ status_t LIS3DH_GetReg3Bit(u8_t registerBIT, u8_t* val) {
       return MEMS_SUCCESS;
     }   
   case LIS3DH_I1_ORUN:       
-    if(value &= LIS3DH_I1_ORUN){     
+    if(value &= LIS3DH_INT1_OVERRUN_ENABLE){     
       *val = MEMS_SET;
       return MEMS_SUCCESS;
     }
     else{  
       *val = MEMS_RESET;
       return MEMS_SUCCESS;
-    }   
-  case LIS3DH_DATAREADY_BIT:       
-    if(value &= LIS3DH_DATAREADY_BIT){     
-      *val = MEMS_SET;
-      return MEMS_SUCCESS;
-    }
-    else{  
-      *val = MEMS_RESET;
-      return MEMS_SUCCESS;
-    }                                  
+    }               
     
   }
   return MEMS_ERROR;
@@ -1805,4 +1790,90 @@ status_t LIS3DH_SetSPIInterface(LIS3DH_SPIMode_t spi) {
   
   return MEMS_SUCCESS;
 }
+
+
+
+char LIS3DH_ReadFIFO(void){
+    uint8_t  data_cnt = 0; 
+    uint8_t  tmp;
+	
+	  uint8_t pack;
+		uint8_t addr;
+	
+		i16_t value;
+		u8_t *valueL = (u8_t *)(&value);
+		u8_t *valueH = ((u8_t *)(&value)+1);
+	
+	// NB! Multireading is very neccessary since it will extend sleep time of uC.
+	
+		LIS3DH_GetFifoSourceBit(LIS3DH_FIFO_SRC_EMPTY, &tmp);
+    if(tmp == MEMS_SET)  {   ///< фифо не пустое
+				LIS3DH_GetFifoSourceFSS(&data_cnt);
+			
+        if (data_cnt == 0) {      // FIFO буфер пустой, хотя приходим за данными раз в N милисекунд(см. биты WTM в LIS3DH_FIFO_CTRL_REG_CONF)
+            return 0;
+        } else {
+						LIS3DH_GetFifoSourceBit(LIS3DH_FIFO_SRC_OVRUN, &tmp);
+            if (tmp == MEMS_SET) {       //Установленный этот флаг означает, что в буфере 32 значения, и часть уже, возможно, потеряна    
+                data_cnt = 32; //LIS3DH_FIFO_MAX_CNT;
+								printf("OVRN!\r\n");
+            }           
+								ACC_ENABLE;
+
+								addr = (0x28) | (0x80) | (0x40);	// with multiread
+								HAL_SPI_Transmit(&hspi1, &addr, sizeof(addr), 0x1000);
+							 
+								for (pack = 0; pack < data_cnt; ++pack) {
+										HAL_SPI_TransmitReceive(&hspi1, valueL, valueL, 1, 0x1000);
+										HAL_SPI_TransmitReceive(&hspi1, valueH, valueH, 1, 0x1000);
+									
+									//	printf("X=%i ", value);
+									
+										HAL_SPI_TransmitReceive(&hspi1, valueL, valueL, 1, 0x1000);
+										HAL_SPI_TransmitReceive(&hspi1, valueH, valueH, 1, 0x1000);
+										
+									//	printf("Y=%i ", value);
+									
+										HAL_SPI_TransmitReceive(&hspi1, valueL, valueL, 1, 0x1000);
+										HAL_SPI_TransmitReceive(&hspi1, valueH, valueH, 1, 0x1000);
+									
+									//	printf("Z=%i\r\n", value);
+								}
+
+								ACC_DISABLE;		
+            return data_cnt;
+        }
+    } else {
+        return 0;
+    }
+}
+
+/** -------------------------------------------------------------------------------
+  *
+  * \brief          Отключение i2c. 
+  *  
+  * \note           Эта функция должна быть вызвана до Init'а самой микросхемы и всех 
+  *                 остальных lis'ов, которые висят на том же SPI 
+  *  
+  * \details        В рамках задачи XN-4170 было обнаружено, что пин CS в микросхеме LIS
+  *                 является не совсем CS. Когда он в "0" - она CS, когда в "1" - он переключает
+  *                 микросхему в режим i2c. Тогда весь обмен данными по spi с другими устройставми
+  *                 будет восприниматься как шум на i2c линии.
+  *  
+  *                 Проблема в том, что момент инициализации SPI генерит ложный i2c-старт (линия MOSI (=SDA)
+  *                 падает в "0" при стоящей в "1" линии SCK (=SCL)). При этом запись в регистры 0x30, 0x31,
+  *                 0x32 и 0x33 другого Lis'а, висящего на той же шине, декодируются как i2c-адрес. И тогда
+  *                 lis начинает сам управлять линией SDA (=MOSI)
+  *                 
+  * -------------------------------------------------------------------------------
+  */
+void LIS3DH_PreInit(void){
+    uint8_t  temp;
+
+    LIS3DH_ReadReg(REG_LIS3DH_SERIAL_MODE, &temp);
+    temp |= SERIAL_MODE_I2C_DISABLE;
+    LIS3DH_WriteReg(REG_LIS3DH_SERIAL_MODE, temp);
+}
+
+
 /******************* (C) COPYRIGHT 2012 STMicroelectronics *****END OF FILE****/
