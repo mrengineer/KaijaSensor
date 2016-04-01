@@ -452,8 +452,6 @@ LIS3DH_NO_CLICK                        =               0x00
 #define LIS3DH_FIFO_CTRL_REG			      0x2E
 #define LIS3DH_FIFO_SRC_REG			        0x2F
 
-#define REG_LIS3DH_SERIAL_MODE         0x17    // Номер регистра получен от ST-шников в личной переписке: установка старшего бита в нем отключает i2c
-#define SERIAL_MODE_I2C_DISABLE        0x80                                  ///< См. комментарий к определению REG_LIS3DH_SERIAL_MODE
 
 /* Exported macro ------------------------------------------------------------*/
 
@@ -500,7 +498,6 @@ status_t LIS3DH_SetInt6D4DConfiguration(LIS3DH_INT_6D_4D_t ic);
 status_t LIS3DH_GetInt1Src(u8_t* val);
 status_t LIS3DH_GetInt1SrcBit(u8_t statusBIT, u8_t* val);
 status_t LIS3DH_GetReg3Bit(u8_t registerBIT, u8_t* val);
-status_t LIS3DH_GetIntCounter(u8_t* val);
 
 //FIFO Functions
 status_t LIS3DH_FIFOModeEnable(LIS3DH_FifoMode_t fm);
@@ -526,8 +523,6 @@ status_t LIS3DH_Get6DPosition(u8_t* val);
 // i.e. u8_t LIS3DH_ReadReg(u8_t Reg, u8_t* Data);
 // i.e. u8_t LIS3DH_WriteReg(u8_t Reg, u8_t Data);
 
-char LIS3DH_ReadFIFO(void);
-void LIS3DH_PreInit(void);
 
 #endif /* __LIS3DH_H */
 

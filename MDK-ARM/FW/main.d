@@ -45,4 +45,3 @@ fw\main.o: ../Middlewares/Third_Party/FatFs/src/drivers/sd_diskio.h
 fw\main.o: ../Inc/lis3dh_driver.h
 fw\main.o: ../Inc/power.h
 fw\main.o: ../Inc/mxconstants.h
-fw\main.o: ../Inc/defines.h

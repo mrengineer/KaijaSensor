@@ -1,4 +1,4 @@
-/**	27.03.2016
+/**	19.03.2016
   ******************************************************************************
   * File Name          : main.c
   * Description        : Main program body
@@ -38,9 +38,40 @@
 #include <stdio.h>
 #include "lis3dh_driver.h"
 #include "power.h"
-#include "defines.h"
 
+//Acc
+#define ACC_ENABLE					HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_RESET)
+#define ACC_DISABLE					HAL_GPIO_WritePin(ACC_CS_GPIO_Port, ACC_CS_Pin, GPIO_PIN_SET)
 
+// Magnetic sensors		----------------------------------------------------------------------------------------
+//Power management
+#define CLAMP_SENS_PWR_ON		HAL_GPIO_WritePin(HALL_CLAMP_PWR_GPIO_Port, HALL_CLAMP_PWR_Pin, GPIO_PIN_SET)
+#define CLAMP_SENS_PWR_OFF	HAL_GPIO_WritePin(HALL_CLAMP_PWR_GPIO_Port, HALL_CLAMP_PWR_Pin, GPIO_PIN_RESET)
+#define HALL_SENS_PWR_ON		HAL_GPIO_WritePin(HALL_SENS_PWR_GPIO_Port, HALL_SENS_PWR_Pin, GPIO_PIN_SET)
+#define HALL_SENS_PWR_OFF		HAL_GPIO_WritePin(HALL_SENS_PWR_GPIO_Port, HALL_SENS_PWR_Pin, GPIO_PIN_RESET)
+
+//Read sensors
+#define IS_SENS_CLAMP_A_ON 	HAL_GPIO_ReadPin(SENS_CLAMP_A_GPIO_Port, SENS_CLAMP_A_Pin) 	== GPIO_PIN_RESET				//Sensor gives + when no magnetic field
+#define IS_SENS_CLAMP_B_ON 	HAL_GPIO_ReadPin(SENS_CLAMP_B_GPIO_Port, SENS_CLAMP_B_Pin) 	== GPIO_PIN_RESET				//Sensor gives + when no magnetic field
+#define IS_SENS_OPEN_ON		 	HAL_GPIO_ReadPin(SENS_OPEN_GPIO_Port, 		SENS_OPEN_Pin) 		== GPIO_PIN_RESET				//Sensor gives + when no magnetic field
+#define IS_SENS_TAKEOFF_ON	HAL_GPIO_ReadPin(SENS_TAKEOFF_GPIO_Port, 	SENS_TAKEOFF_Pin) == GPIO_PIN_RESET				//Sensor gives + when no magnetic field
+
+//Indictaors		---------------------------------------------------------------------------------------------
+#define IND1_ON							HAL_GPIO_WritePin(INDICATOR1_GPIO_Port, INDICATOR1_Pin, GPIO_PIN_SET)
+#define IND1_OFF						HAL_GPIO_WritePin(INDICATOR1_GPIO_Port, INDICATOR1_Pin, GPIO_PIN_RESET)
+
+#define IND2_ON							HAL_GPIO_WritePin(INDICATOR2_GPIO_Port, INDICATOR2_Pin, GPIO_PIN_SET)
+#define IND2_OFF						HAL_GPIO_WritePin(INDICATOR2_GPIO_Port, INDICATOR2_Pin, GPIO_PIN_RESET)
+
+#define IND3_ON							HAL_GPIO_WritePin(INDICATOR3_GPIO_Port, INDICATOR3_Pin, GPIO_PIN_SET)   
+#define IND3_OFF						HAL_GPIO_WritePin(INDICATOR3_GPIO_Port, INDICATOR3_Pin, GPIO_PIN_RESET)
+
+#define IND4_ON							HAL_GPIO_WritePin(STATUS_GPIO_Port, STATUS_Pin, GPIO_PIN_SET)  
+#define IND4_OFF						HAL_GPIO_WritePin(STATUS_GPIO_Port, STATUS_Pin, GPIO_PIN_RESET)
+
+//SD card	Do not forget enable 2.5 V for power supply and switch uC to higher voltage in order to meet IO signals of memory card!
+#define SD_PWR_ON						HAL_GPIO_WritePin(SD_PWR_GPIO_Port, SD_PWR_Pin, GPIO_PIN_RESET)
+#define SD_PWR_OFF					HAL_GPIO_WritePin(SD_PWR_GPIO_Port, SD_PWR_Pin, GPIO_PIN_SET)
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -89,7 +120,6 @@ static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_RTC_Init(void);
 static void EXTI0_IRQHandler_Config(void);
-static void EXTI13_IRQHandler_Config(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -128,9 +158,11 @@ while (ITM_Port32(0) == 0);
 
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
-//  AxesRaw_t data;
+	
+  AxesRaw_t data;
 	
 	FRESULT res; /* FatFs function common result code */
 	uint32_t byteswritten, bytesread; /* File write/read counts */
@@ -154,12 +186,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  //MX_ADC_Init();
+  MX_ADC_Init();
   //MX_SDIO_SD_Init();
   MX_SPI1_Init();
-  //MX_SPI2_Init();
-  //MX_USART1_UART_Init();
-  //MX_USART2_UART_Init();
+  MX_SPI2_Init();
+  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
   //MX_FATFS_Init();
   MX_RTC_Init();
 
@@ -168,9 +200,8 @@ int main(void)
 	HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 1, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
 
   EXTI0_IRQHandler_Config();
-//	EXTI13_IRQHandler_Config();
-	
-//	HAL_DBGMCU_EnableDBGStopMode();
+		
+	HAL_DBGMCU_EnableDBGStopMode();
 
 
 	//HALL_SENS_PWR_ON;
@@ -179,105 +210,8 @@ int main(void)
 	
 	// init gpio before!
 	UC_2_8V;
- 
- 
-	printf("FW start\r\n");
-
-
-	LIS3DH_PreInit();
-	LIS3DH_SetMode(LIS3DH_NORMAL); 				//reg1
-	LIS3DH_SetODR(LIS3DH_ODR_400Hz); 			//reg1
-	LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE ); //reg1
-
-	//Direct IRQ from watemark and overrun to 1st pin. reg3
-	LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE 		| 	LIS3DH_I1_INT1_ON_PIN_INT1_DISABLE 	| 	LIS3DH_I1_INT2_ON_PIN_INT1_DISABLE 	| 
-										LIS3DH_I1_DRDY1_ON_INT1_DISABLE			| 	LIS3DH_I1_DRDY2_ON_INT1_DISABLE 		| 	LIS3DH_WTM_ON_INT1_ENABLE 					| LIS3DH_INT1_OVERRUN_DISABLE);
-
-	//REG4
-	LIS3DH_SetBDU(MEMS_ENABLE);
-  LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);  //reg4
-
-	//REG5
-  LIS3DH_FIFOModeEnable(LIS3DH_FIFO_STREAM_MODE);	//Enable store into FIFO reg5
-	LIS3DH_Int1LatchEnable(MEMS_ENABLE);
 	
-	
-	//LIS3DH_FIFO_CTRL_REG
-	LIS3DH_SetTriggerInt(LIS3DH_TRIG_INT1);
-	LIS3DH_SetWaterMark(15); 									// watermark for irq generation from fifo  LIS3DH_FIFO_CTRL_REG
-
-	LIS3DH_ReadFIFO();												// clean FIFO and reset IRQ
-
-
-while (1) {
-	//LIS3DH_GetInt1Src(&resp);
-	//printf("INT1SRC %i ", resp);
-	
-	/*LIS3DH_GetFifoSourceBit(LIS3DH_FIFO_SRC_WTM, &resp);
-	printf("WTM %i ", resp);
-	
-	LIS3DH_GetReg3Bit(LIS3DH_I1_WTM, &resp);
-	printf("WMBIT %i ", resp);
-	
-	LIS3DH_GetFifoSourceFSS(&resp);
-	printf("FIFO %i\r\n", resp);
-	
-	
-	//LIS3DH_GetIntCounter(&resp);
-	//printf("Interrupts counter=%i\r\n", resp);	
-	if (resp > 26) {
-		
-		//rep:
-			//LIS3DH_GetFifoSourceFSS(&resp);
-			//printf("> %i recs in FIFO (while)\r\n", resp);
-			//HAL_Delay(15);
-		//LIS3DH_GetInt1Src(&resp);
-/*		rep:
-		if(LIS3DH_GetAccAxesRaw(&data)==1){
-				LIS3DH_GetFifoSourceBit(LIS3DH_FIFO_SRC_WTM, &resp);
-				//printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
-			printf("  READ WTM%i\r\n", resp);
-		} else {
-				printf("ER\r\n");
-		}
-		
-		LIS3DH_GetFifoSourceFSS(&resp);
-		if (resp > 0) goto rep;
-		
-		LIS3DH_ResetInt1Latch();
-		
-		
-		LIS3DH_FIFOModeEnable(LIS3DH_FIFO_STREAM_MODE);*/
-
-			LIS3DH_ReadFIFO();
-	HAL_Delay(2000);
-}
-//ENABLE ALL IRQs
-//LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | LIS3DH_I1_INT2_ON_PIN_INT1_ENABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE | LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
-//LIS3DH_SetInt2Pin(LIS3DH_CLICK_ON_PIN_INT2_DISABLE | LIS3DH_I2_INT1_ON_PIN_INT2_ENABLE | LIS3DH_I2_INT2_ON_PIN_INT2_ENABLE | LIS3DH_I2_BOOT_ON_INT2_ENABLE | LIS3DH_INT_ACTIVE_HIGH);
-//	HAL_Delay(2000);
-	
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)  {
-  /* USER CODE END WHILE */
-
-  /* USER CODE BEGIN 3 */
-		
-//		if(LIS3DH_GetAccAxesRaw(&data)==1){
-//			printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
-//		} else {
-//			printf("ER\r\n");
-//		}
-		HAL_Delay(50);
-
-		//	lowest_power();		//go to stop. Wakeup on RTC wakeup or 1st or 2d PIN wakeup
-  }
-	
-	
-//SDIO FAT PART.
+goto skp;
 	
 	//ENABLE_2_5V;	//DC-DC enable
 	SD_PWR_ON;		//Power to SD card
@@ -339,12 +273,12 @@ while (1) {
 										 } else {
 												 /*##-8- Read data from the text file #########*/
 												 res = f_read(&MyFile, rtext, sizeof(wtext), &bytesread);
-//												 if((strcmp(rtext,wtext)!=0)|| (res != FR_OK)){
-//													 /* 'Hello.txt' file Read or EOF Error : set the red LED on */
-//													 				 printf ("Problem f_read\r\n");
-//													 while(1);
-//												 } else {
-//													 printf ("FAT operation done OK!\r\n");
+												 if((strcmp(rtext,wtext)!=0)|| (res != FR_OK)){
+													 /* 'Hello.txt' file Read or EOF Error : set the red LED on */
+													 				 printf ("Problem f_read\r\n");
+													 while(1);
+												 } else {
+													 printf ("FAT operation done OK!\r\n");
 													 /* Successful read : set the green LED On */
 													 //HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);
 													 /*##-9- Close the open text file ################*/
@@ -355,11 +289,123 @@ while (1) {
 						 }
 				 }
 		 }
- 
+ }
  /*##-10- Unlink the micro SD disk I/O driver #########*/
  FATFS_UnLinkDriver(SD_Path);
+
+ skp:
+ 
+	printf("FW start\r\n");
+
+	LIS3DH_GetWHO_AM_I(&resp);
+	printf("LIS3DH_GetWHO_AM_I=%i\r\n", resp);	
+	LIS3DH_GetIntCounter(&resp);
+	printf("Interrupts counter=%i\r\n", resp);	
 	
+ 	LIS3DH_ReadReg(LIS3DH_CTRL_REG3, &resp);
+	printf("REG3=%i\r\n", resp);	
+
+  HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
+	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN2);
+
+
+
+  LIS3DH_SetMode(LIS3DH_NORMAL); 				//reg1
+	LIS3DH_SetODR(LIS3DH_ODR_10Hz); 			//reg1
+	LIS3DH_SetAxis(LIS3DH_X_ENABLE | LIS3DH_Y_ENABLE | LIS3DH_Z_ENABLE ); //reg1
+
+
+	//Direct IRQ from watemark and overrun to 1st pin. reg3
+	LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | 
+										LIS3DH_I1_INT2_ON_PIN_INT1_DISABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE	| 
+										LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_DISABLE);
+
+
+
+  LIS3DH_SetFullScale(LIS3DH_FULLSCALE_2);  //reg4
+	
+	LIS3DH_SetTriggerInt(LIS3DH_TRIG_INT1);
+	
+	LIS3DH_SetWaterMark(10); 												// watermark for irq generation from fifo  LIS3DH_FIFO_CTRL_REG
+	LIS3DH_SetInt1Duration(24);   									// len of irq pulse in n/odr INT1_DUR
+	
+  LIS3DH_FIFOModeEnable(LIS3DH_FIFO_STREAM_MODE);	//Enable store into FIFO reg5
+	LIS3DH_Int1LatchEnable(DISABLE);
+	LIS3DH_SetIntConfiguration(LIS3DH_INT1_OR | LIS3DH_INT1_ZHIE_DISABLE | LIS3DH_INT1_ZLIE_DISABLE | 
+															LIS3DH_INT1_YHIE_DISABLE | LIS3DH_INT1_YLIE_DISABLE | 
+															LIS3DH_INT1_XHIE_DISABLE | LIS3DH_INT1_XLIE_DISABLE );
+	
+ 	LIS3DH_ReadReg(LIS3DH_CTRL_REG3, &resp);
+	printf("REG3=%i\r\n", resp);	
+	
+ 
+HAL_Delay(4000);
+
+while (1) {
+	LIS3DH_GetFifoSourceBit(LIS3DH_FIFO_SRC_WTM, &resp);
+	printf("WTM  %i  ", resp);
+	
+	LIS3DH_GetReg3Bit(LIS3DH_I1_WTM, &resp);
+	printf("WMBIT  %i  ", resp);
+	
+	LIS3DH_GetFifoSourceFSS(&resp);
+	printf("%i recs in FIFO\r\n", resp);
+	
+	//LIS3DH_GetIntCounter(&resp);
+	//printf("Interrupts counter=%i\r\n", resp);	
+	if (resp > 25) {
+		IND2_ON;
+		//rep:
+			//LIS3DH_GetFifoSourceFSS(&resp);
+			//printf("> %i recs in FIFO (while)\r\n", resp);
+			//HAL_Delay(15);
+		//LIS3DH_GetInt1Src(&resp);
+		rep:
+		if(LIS3DH_GetAccAxesRaw(&data)==1){
+				LIS3DH_GetFifoSourceBit(LIS3DH_FIFO_SRC_WTM, &resp);
+				//printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
+			printf("  READ WTM%i\r\n", resp);
+		} else {
+				printf("ER\r\n");
+		}
+		
+		LIS3DH_GetFifoSourceFSS(&resp);
+		if (resp > 0) goto rep;
+		
+		LIS3DH_FIFOModeEnable(LIS3DH_FIFO_STREAM_MODE);
+		IND2_OFF;
+	} else {
+		//LIS3DH_FIFOModeEnable(LIS3DH_FIFO_MODE);
+	}
+
+		
+	HAL_Delay(30);
+}
+//ENABLE ALL IRQs
+//LIS3DH_SetInt1Pin(LIS3DH_CLICK_ON_PIN_INT1_DISABLE | LIS3DH_I1_INT1_ON_PIN_INT1_ENABLE | LIS3DH_I1_INT2_ON_PIN_INT1_ENABLE | LIS3DH_I1_DRDY1_ON_INT1_ENABLE | LIS3DH_I1_DRDY2_ON_INT1_ENABLE | LIS3DH_WTM_ON_INT1_ENABLE | LIS3DH_INT1_OVERRUN_ENABLE);
+//LIS3DH_SetInt2Pin(LIS3DH_CLICK_ON_PIN_INT2_DISABLE | LIS3DH_I2_INT1_ON_PIN_INT2_ENABLE | LIS3DH_I2_INT2_ON_PIN_INT2_ENABLE | LIS3DH_I2_BOOT_ON_INT2_ENABLE | LIS3DH_INT_ACTIVE_HIGH);
+//	HAL_Delay(2000);
+	
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)  {
+  /* USER CODE END WHILE */
+
+  /* USER CODE BEGIN 3 */
+		
+		if(LIS3DH_GetAccAxesRaw(&data)==1){
+			printf("X=%6d Y=%6d Z=%6d \r\n", data.AXIS_X, data.AXIS_Y, data.AXIS_Z); 
+		} else {
+			printf("ER\r\n");
+		}
+		HAL_Delay(50);
+
+		//	lowest_power();		//go to stop. Wakeup on RTC wakeup or 1st or 2d PIN wakeup
+  }
   /* USER CODE END 3 */
+
 }
 
 /** System Clock Configuration
@@ -681,11 +727,11 @@ static void EXTI0_IRQHandler_Config(void)
 {
   GPIO_InitTypeDef   GPIO_InitStructure;
 
-  /* Enable GPIOA clock */
+  /* Enable GPIOC clock */
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /* Configure PA.0 pin as input floating */
-  GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStructure.Pull = GPIO_NOPULL;
   GPIO_InitStructure.Pin = GPIO_PIN_0;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -694,24 +740,6 @@ static void EXTI0_IRQHandler_Config(void)
   HAL_NVIC_SetPriority(EXTI0_IRQn , 2, 0);
   HAL_NVIC_EnableIRQ(EXTI0_IRQn );
 }
-
-/*static void EXTI13_IRQHandler_Config(void)
-{
-  GPIO_InitTypeDef   GPIO_InitStructure;
-
-
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-
-  // Configure PA.0 pin as input floating
-  GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING_FALLING;
-  GPIO_InitStructure.Pull = GPIO_NOPULL;
-  GPIO_InitStructure.Pin = GPIO_PIN_13;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-  // Enable and set EXTI lines 15 to 10 Interrupt to the lowest priority
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn , 2, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
-}*/
 
 /**
   * @brief EXTI line detection callbacks
@@ -722,7 +750,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   if (GPIO_Pin == GPIO_PIN_0)
   {
-		//printf("HELLO FROM CLBK\r\n");
+    /* Toggle LED2 */
+		printf("HELLO FROM CLBK\r\n");
   }
 }
 

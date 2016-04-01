@@ -37,5 +37,3 @@ fw\stm32l1xx_it.o: ../Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_uart.h
 fw\stm32l1xx_it.o: ../Inc/stm32l1xx_it.h
 fw\stm32l1xx_it.o: ../Inc/power.h
 fw\stm32l1xx_it.o: ../Inc/mxconstants.h
-fw\stm32l1xx_it.o: ../Inc/defines.h
-fw\stm32l1xx_it.o: ../Inc/lis3dh_driver.h

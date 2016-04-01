@@ -209,16 +209,15 @@ LIS3DH_NO_CLICK                        =               0x00
 
 
 //Register Definition
-#define LIS3DH_INT_COUNTER		0x0E  // interrupt counter
 #define LIS3DH_WHO_AM_I				0x0F  // device identification register
 
 // CONTROL REGISTER 1
-#define LIS3DH_CTRL_REG1			0x20
-#define LIS3DH_ODR_BIT				BIT(4)
-#define LIS3DH_LPEN						BIT(3)
-#define LIS3DH_ZEN						BIT(2)
-#define LIS3DH_YEN						BIT(1)
-#define LIS3DH_XEN						BIT(0)
+#define LIS3DH_CTRL_REG1		0x20
+#define LIS3DH_ODR_BIT			BIT(4)
+#define LIS3DH_LPEN					BIT(3)
+#define LIS3DH_ZEN					BIT(2)
+#define LIS3DH_YEN					BIT(1)
+#define LIS3DH_XEN					BIT(0)
 
 //CONTROL REGISTER 2
 #define LIS3DH_CTRL_REG2			0x21
@@ -261,7 +260,7 @@ LIS3DH_NO_CLICK                        =               0x00
 #define LIS3DH_SIM					BIT(0)
 
 //CONTROL REGISTER 5
-#define LIS3DH_CTRL_REG5															0x24
+#define LIS3DH_CTRL_REG5				0x24
 #define LIS3DH_BOOT                                    BIT(7)
 #define LIS3DH_FIFO_EN                                 BIT(6)
 #define LIS3DH_LIR_INT1                                BIT(3)
@@ -360,7 +359,7 @@ LIS3DH_NO_CLICK                        =               0x00
 #define LIS3DH_INT1_DURATION                           0x33
 
 //INTERRUPT 1 SOURCE REGISTER
-#define LIS3DH_INT1_SRC																 0x31
+#define LIS3DH_INT1_SRC				0x31
 
 //FIFO Source Register bit Mask
 #define LIS3DH_FIFO_SRC_WTM                            0x80
@@ -368,7 +367,7 @@ LIS3DH_NO_CLICK                        =               0x00
 #define LIS3DH_FIFO_SRC_EMPTY                          0x20
   
 //INTERRUPT CLICK REGISTER
-#define LIS3DH_CLICK_CFG															 0x38
+#define LIS3DH_CLICK_CFG				0x38
 //INTERRUPT CLICK CONFIGURATION bit mask
 #define LIS3DH_ZD_ENABLE                               0x20
 #define LIS3DH_ZD_DISABLE                              0x00
@@ -474,7 +473,6 @@ status_t LIS3DH_SetBLE(LIS3DH_Endianess_t ble);
 status_t LIS3DH_SetSelfTest(LIS3DH_SelfTest_t st);
 status_t LIS3DH_SetTemperature(State_t state);
 status_t LIS3DH_SetADCAux(State_t state);
-status_t LIS3DH_Reboot(void);
 
 //Filtering Functions
 status_t LIS3DH_HPFClickEnable(State_t hpfe);
@@ -497,8 +495,6 @@ status_t LIS3DH_SetClickCFG(u8_t status);
 status_t LIS3DH_SetInt6D4DConfiguration(LIS3DH_INT_6D_4D_t ic);
 status_t LIS3DH_GetInt1Src(u8_t* val);
 status_t LIS3DH_GetInt1SrcBit(u8_t statusBIT, u8_t* val);
-status_t LIS3DH_GetReg3Bit(u8_t registerBIT, u8_t* val);
-status_t LIS3DH_GetIntCounter(u8_t* val);
 
 //FIFO Functions
 status_t LIS3DH_FIFOModeEnable(LIS3DH_FifoMode_t fm);
