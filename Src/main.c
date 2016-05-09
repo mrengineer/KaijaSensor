@@ -1,4 +1,4 @@
-/**	27.03.2016
+/**
   ******************************************************************************
   * File Name          : main.c
   * Description        : Main program body
@@ -88,8 +88,6 @@ static void MX_SPI2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_RTC_Init(void);
-static void EXTI0_IRQHandler_Config(void);
-static void EXTI13_IRQHandler_Config(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -128,6 +126,7 @@ while (ITM_Port32(0) == 0);
 
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
 //  AxesRaw_t data;
@@ -154,13 +153,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  //MX_ADC_Init();
-  //MX_SDIO_SD_Init();
+  MX_ADC_Init();
+  MX_SDIO_SD_Init();
   MX_SPI1_Init();
-  //MX_SPI2_Init();
-  //MX_USART1_UART_Init();
-  //MX_USART2_UART_Init();
-  //MX_FATFS_Init();
+  MX_SPI2_Init();
+  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
+  MX_FATFS_Init();
   MX_RTC_Init();
 
   /* USER CODE BEGIN 2 */
@@ -360,6 +359,7 @@ while (1) {
  FATFS_UnLinkDriver(SD_Path);
 	
   /* USER CODE END 3 */
+
 }
 
 /** System Clock Configuration
@@ -387,11 +387,11 @@ void SystemClock_Config(void)
 
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-  HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
+  HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1);
 
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
   PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
@@ -685,13 +685,13 @@ static void EXTI0_IRQHandler_Config(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /* Configure PA.0 pin as input floating */
-  GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING_FALLING; //GPIO_MODE_IT_RISING;
   GPIO_InitStructure.Pull = GPIO_NOPULL;
   GPIO_InitStructure.Pin = GPIO_PIN_0;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 
   /* Enable and set EXTI lines 15 to 10 Interrupt to the lowest priority */
-  HAL_NVIC_SetPriority(EXTI0_IRQn , 2, 0);
+  HAL_NVIC_SetPriority(EXTI0_IRQn , 1, 0);
   HAL_NVIC_EnableIRQ(EXTI0_IRQn );
 }
 
